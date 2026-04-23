@@ -327,14 +327,20 @@ const scoreTheme = (questions, answers) =>
 async function sendToTelegram(blob, studentName, grade) {
   if(!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return {ok:false, reason:"not_configured"};
   try {
+    const filename = "Science_Workshop_" + studentName.replace(/\s+/g,"_") + ".pdf";
+    const date = new Date().toLocaleDateString("es-AR");
+    const caption = "Science Workshop PDF\nStudent: " + studentName + "\nGrade: " + grade + "\nDate: " + date;
     const form = new FormData();
     form.append("chat_id", TELEGRAM_CHAT_ID);
-    form.append("document", blob, `Science_Workshop_${studentName.replace(/\s+/g,"_")}.pdf`);
-    form.append("caption", `📚 *Science Workshop PDF*\n👤 ${studentName}\n🏫 ${grade}\n📅 ${new Date().toLocaleDateString("es-AR")}`);
-    form.append("parse_mode","Markdown");
-    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`,{method:"POST",body:form});
+    form.append("document", new File([blob], filename, {type:"application/pdf"}));
+    form.append("caption", caption);
+    const res = await fetch(
+      "https://api.telegram.org/bot" + TELEGRAM_BOT_TOKEN + "/sendDocument",
+      {method:"POST", body:form}
+    );
     const data = await res.json();
-    return {ok:data.ok, reason:data.ok?"sent":data.description};
+    if(!data.ok) console.warn("Telegram error:", data.description);
+    return {ok:data.ok, reason:data.ok ? "sent" : data.description};
   } catch(e) {
     return {ok:false, reason:e.message};
   }
