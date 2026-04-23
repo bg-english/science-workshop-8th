@@ -342,7 +342,12 @@ async function sendToTelegram(blob, studentName, grade) {
 
 // ─── PDF Generator ────────────────────────────────────────
 // Strip characters outside Latin-1 (unsupported by standard PDF fonts)
-const pdfSafe = (str) => String(str || "").replace(/[^\x00-\xFF]/g, "");
+const pdfSafe = (str) => String(str || "")
+  .replace(/\u2014|\u2013/g, "-")   // em/en dash → hyphen
+  .replace(/[\u2018\u2019]/g, "'")  // curly single quotes → straight
+  .replace(/[\u201C\u201D]/g, '"')  // curly double quotes → straight
+  .replace(/[^\x00-\xFF]/g, "")     // strip anything else outside Latin-1
+  .replace(/ {2,}/g, " ");          // collapse double spaces
 
 function generatePDF(name, grade, answers, scores) {
   if(!window.jspdf) throw new Error("jsPDF not loaded. Check internet connection.");
