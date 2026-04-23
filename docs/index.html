@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/htm/dist/htm.umd.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" crossorigin></script>
+  <!-- jsPDF loaded dynamically inside App to avoid CORS crossorigin issues -->
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'DM Sans',system-ui,sans-serif;background:#1c1917;min-height:100vh}
@@ -802,7 +802,7 @@ function BiblicalTab({themeIdx, onPrev, onNext}) {
   </div>`;
 }
 
-function WorkshopTab({name, grade, answers, setAnswers, onSubmit, submitting}) {
+function WorkshopTab({name, grade, answers, setAnswers, onSubmit, submitting, pdfReady}) {
   const totalPts = WORKSHOP.flat().reduce((s,q)=>s+q.pts,0);
   return html`<div class="fade-in">
     <div style=${{padding:"16px 18px",background:"#fef2f2",borderRadius:12,marginBottom:16,borderLeft:"4px solid #dc2626"}}>
@@ -835,9 +835,12 @@ function WorkshopTab({name, grade, answers, setAnswers, onSubmit, submitting}) {
         </div>`)}
       </div>`;
     })}
-    <button onClick=${onSubmit} disabled=${submitting}
-      style=${{width:"100%",padding:"16px 0",background:submitting?"#9ca3af":"#dc2626",color:"#fff",border:"none",borderRadius:12,fontSize:16,fontWeight:700,boxShadow:"0 4px 12px rgba(220,38,38,.3)",transition:"all .2s"}}>
-      ${submitting?"⏳ Generating PDF...":"🚀 Submit Workshop & Generate PDF"}
+    ${!pdfReady&&html`<div style=${{padding:"10px 14px",background:"#fef9c3",borderRadius:8,fontSize:12,color:"#854d0e",marginBottom:10,textAlign:"center"}}>
+      ⏳ Loading PDF engine... please wait.
+    </div>`}
+    <button onClick=${onSubmit} disabled=${submitting||!pdfReady}
+      style=${{width:"100%",padding:"16px 0",background:submitting||!pdfReady?"#9ca3af":"#dc2626",color:"#fff",border:"none",borderRadius:12,fontSize:16,fontWeight:700,boxShadow:pdfReady?"0 4px 12px rgba(220,38,38,.3)":"none",transition:"all .2s",cursor:submitting||!pdfReady?"default":"pointer"}}>
+      ${submitting?"⏳ Generating PDF...":!pdfReady?"Loading PDF engine...":"🚀 Submit Workshop & Generate PDF"}
     </button>
   </div>`;
 }
@@ -1003,7 +1006,26 @@ function App() {
   const [pdfBlob, setPdfBlob] = useState(null);
   const [scores, setScores] = useState([0,0,0]);
   const [telegramStatus, setTelegramStatus] = useState("not_configured");
+  const [jsPDFReady, setJsPDFReady] = useState(false);
   const scrollRef = useRef(null);
+
+  // Load jsPDF dynamically (avoids crossorigin CORS issues with static script tags)
+  useEffect(()=>{
+    if(window.jspdf){ setJsPDFReady(true); return; }
+    const load = (url, onOk, onFail) => {
+      const s = document.createElement("script");
+      s.src = url;
+      s.onload  = onOk;
+      s.onerror = onFail;
+      document.head.appendChild(s);
+    };
+    const primary  = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js";
+    const fallback = "https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js";
+    load(primary,
+      () => setJsPDFReady(true),
+      () => load(fallback, () => setJsPDFReady(true), () => console.error("jsPDF failed to load from both CDNs"))
+    );
+  },[]);
 
   // Scroll to top on tab change
   useEffect(()=>{
@@ -1090,7 +1112,7 @@ function App() {
       ${tabIdx===2&&html`<${BiblicalTab} themeIdx=${themeIdx} onPrev=${()=>setTabIdx(1)} onNext=${()=>setTabIdx(3)}/>`}
       ${tabIdx===3&&!submitted&&html`<${WorkshopTab} name=${name} grade=${grade}
         answers=${workshopAnswers} setAnswers=${setWorkshopAnswers}
-        onSubmit=${handleSubmit} submitting=${submitting}/>`}
+        onSubmit=${handleSubmit} submitting=${submitting} pdfReady=${jsPDFReady}/>`}
       ${tabIdx===3&&submitted&&html`<${ResultsScreen} name=${name} grade=${grade}
         pdfBlob=${pdfBlob} scores=${scores} telegramStatus=${telegramStatus}
         onRetry=${()=>{setSubmitted(false);setWorkshopAnswers({});setPdfBlob(null);setScores([0,0,0]);setTelegramStatus("not_configured");}}/>`}
