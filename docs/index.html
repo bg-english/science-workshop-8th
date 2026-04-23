@@ -35,6 +35,54 @@ const TELEGRAM_BOT_TOKEN = "8699697646:AAHwBUojDjhHOYpSIJ9Cwe06FZBhDLetB4s";
 const TELEGRAM_CHAT_ID   = "2041749428";
 // ═══════════════════════════════════════════════════════
 
+// ─── Student roster ───────────────────────────────────────
+const STUDENTS = {
+  // 8th Grade — Azul
+  "fiorellaaronna@redboston.edu.co":   {name:"Fiorella Aronna Campo",            grade:"8th Grade — Azul"},
+  "mathiasbello@redboston.edu.co":     {name:"Mathias Bello Piraquive",           grade:"8th Grade — Azul"},
+  "danette@redboston.edu.co":          {name:"Danette Sofia Caicedo Montes",      grade:"8th Grade — Azul"},
+  "juan.s.calvo@redboston.edu.co":     {name:"Juan Sebastian Calvo Valega",       grade:"8th Grade — Azul"},
+  "diegocastilla@redboston.edu.co":    {name:"Diego Castilla Ordoñez",            grade:"8th Grade — Azul"},
+  "sebastiancas@redboston.edu.co":     {name:"Sebastian Jose Castro Reales",      grade:"8th Grade — Azul"},
+  "gabrieladiaz@redboston.edu.co":     {name:"Gabriela Diaz Castro",              grade:"8th Grade — Azul"},
+  "lionelfloriano@redboston.edu.co":   {name:"Lionel Mathias Floriano Martinez",  grade:"8th Grade — Azul"},
+  "valerielizarazo@redboston.edu.co":  {name:"Valerie Lizarazo Llanos",           grade:"8th Grade — Azul"},
+  "sofiamaradey@redboston.edu.co":     {name:"Sofia Isabel Maradei Beleño",       grade:"8th Grade — Azul"},
+  "samuel@redboston.edu.co":           {name:"Samuel David Niño Romero",          grade:"8th Grade — Azul"},
+  "miguelpanciera@redboston.edu.co":   {name:"Miguel Angel Panciera Dizzopola",   grade:"8th Grade — Azul"},
+  "lucianapedraza@redboston.edu.co":   {name:"Luciana Sofia Pedraza Medrano",     grade:"8th Grade — Azul"},
+  "sarahperez@redboston.edu.co":       {name:"Sarah Paola Perez Ahumada",         grade:"8th Grade — Azul"},
+  "samuelporto@redboston.edu.co":      {name:"Samuel Porto Rangel",               grade:"8th Grade — Azul"},
+  "jose@redboston.edu.co":             {name:"Jose Alejandro Quintero Puentes",   grade:"8th Grade — Azul"},
+  "valentinareyes@redboston.edu.co":   {name:"Valentina Reyes Cohen",             grade:"8th Grade — Azul"},
+  "nadiarodriguez@redboston.edu.co":   {name:"Nadia Rodriguez Cadavid",           grade:"8th Grade — Azul"},
+  "kendallrojano@redboston.edu.co":    {name:"Kendall Rojano Orozco",             grade:"8th Grade — Azul"},
+  "samuelsabalza@redboston.edu.co":    {name:"Samuel Sabalza Bermudez",           grade:"8th Grade — Azul"},
+  "eesierra@redboston.edu.co":         {name:"Emanuel Sierra Sierra",             grade:"8th Grade — Azul"},
+  // 8th Grade — Rojo
+  "alejandraalvarez@redboston.edu.co": {name:"Alejandra Alvarez Gonzalez",        grade:"8th Grade — Rojo"},
+  "sofiaarevalomin@redboston.edu.co":  {name:"Sofia Arevalo Mindiola",            grade:"8th Grade — Rojo"},
+  "victorias@redboston.edu.co":        {name:"Victoria Ariza Salas",              grade:"8th Grade — Rojo"},
+  "josecastellon@redboston.edu.co":    {name:"Jose Manuel Castellon Ensuncho",    grade:"8th Grade — Rojo"},
+  "andreschima@redboston.edu.co":      {name:"Andres Chima Maestre",              grade:"8th Grade — Rojo"},
+  "cristinacontreras@redboston.edu.co":{name:"Cristina Contreras Rada",           grade:"8th Grade — Rojo"},
+  "susancrespo@redboston.edu.co":      {name:"Susan Gabriela Crespo Ricardo",     grade:"8th Grade — Rojo"},
+  "viviangil@redboston.edu.co":        {name:"Vivian Naomy Gil Gomez",            grade:"8th Grade — Rojo"},
+  "andresgonzalez@redboston.edu.co":   {name:"Andres Camilo Gonzalez Restrepo",   grade:"8th Grade — Rojo"},
+  "nicolemanosalva@redboston.edu.co":  {name:"Nicolle Manosalva Yali",            grade:"8th Grade — Rojo"},
+  "valentinomartinez@redboston.edu.co":{name:"Valentino Martinez Castro",         grade:"8th Grade — Rojo"},
+  "sarameza@redboston.edu.co":         {name:"Sara Meza Yepes",                   grade:"8th Grade — Rojo"},
+  "juanseortiz@redboston.edu.co":      {name:"Juan Sebastian Ortiz Vidal",        grade:"8th Grade — Rojo"},
+  "mateopachon@redboston.edu.co":      {name:"Mateo Raul Pachon Tapias",          grade:"8th Grade — Rojo"},
+  "marianapareja@redboston.edu.co":    {name:"Mariana Pareja Pedraza",            grade:"8th Grade — Rojo"},
+  "moisespomarico@redboston.edu.co":   {name:"Moises Pomarico Casdiego",          grade:"8th Grade — Rojo"},
+  "santiagoporto@redboston.edu.co":    {name:"Santiago Porto Rangel",             grade:"8th Grade — Rojo"},
+  "isabelpua@redboston.edu.co":        {name:"Isabel Sofia Pua Muñoz",            grade:"8th Grade — Rojo"},
+  "maryannrenteria@redboston.edu.co":  {name:"Maryann Renteria Prens",            grade:"8th Grade — Rojo"},
+  "juanesromero@redboston.edu.co":     {name:"Juan Esteban Romero Orozco",        grade:"8th Grade — Rojo"},
+  "dannasarmiento@redboston.edu.co":   {name:"Danna Sarmiento Gonzalez",          grade:"8th Grade — Rojo"},
+};
+
 const html = htm.bind(React.createElement);
 const { useState, useEffect, useRef, useCallback } = React;
 
@@ -841,6 +889,95 @@ function ResultsScreen({name, grade, pdfBlob, scores, onRetry, telegramStatus}) 
   </div>`;
 }
 
+// ─── Login Screen ─────────────────────────────────────────
+function LoginScreen({onLogin}) {
+  const [email, setEmail] = useState("");
+  const [error, setError]   = useState("");
+  const [found, setFound]   = useState(null); // {name, grade} or null
+
+  const lookup = (raw) => {
+    const val = raw.trim().toLowerCase();
+    setEmail(raw);
+    setError("");
+    setFound(null);
+    if(!val) return;
+    const student = STUDENTS[val];
+    if(student) {
+      setFound(student);
+    } else if(val.length > 5 && val.includes("@")) {
+      setError("Email not found. Check spelling or contact Prof. Ortiz.");
+    }
+  };
+
+  const submit = () => {
+    if(!found) return;
+    onLogin(found.name, found.grade);
+  };
+
+  return html`
+    <div style=${{minHeight:"100vh",background:"#1c1917",display:"flex",alignItems:"center",justifyContent:"center",padding:20,fontFamily:C.sans}}>
+      <div style=${{maxWidth:420,width:"100%",textAlign:"center"}}>
+        <div style=${{fontSize:56,marginBottom:12}}>🔬</div>
+        <h1 style=${{color:"#fafaf9",fontSize:28,fontWeight:700,marginBottom:4,fontFamily:C.font}}>8th Grade Science</h1>
+        <p style=${{color:"#a8a29e",fontSize:14,marginBottom:6}}>Complete Learning Experience — 1st Term 2026</p>
+        <p style=${{color:"#78716c",fontSize:11,marginBottom:32,fontStyle:"italic"}}>Learn · Practice · Reflect · Be Evaluated</p>
+
+        <div style=${{background:"rgba(255,255,255,.05)",borderRadius:16,padding:"28px 24px",border:"1px solid rgba(255,255,255,.08)"}}>
+          <p style=${{color:"#a8a29e",fontSize:13,marginBottom:16,textAlign:"left"}}>Enter your school email to access the workshop:</p>
+
+          <div style=${{position:"relative",marginBottom:12}}>
+            <input
+              value=${email}
+              onChange=${e=>lookup(e.target.value)}
+              onKeyDown=${e=>e.key==="Enter"&&submit()}
+              placeholder="yourname@redboston.edu.co"
+              type="email"
+              autocomplete="email"
+              style=${{
+                width:"100%", padding:"14px 16px",
+                border: found ? "1.5px solid #22c55e" : error ? "1.5px solid #ef4444" : "1.5px solid rgba(255,255,255,.12)",
+                borderRadius:10, fontSize:14,
+                background:"rgba(255,255,255,.06)", color:"#fafaf9",
+                outline:"none", boxSizing:"border-box", fontFamily:C.sans,
+                transition:"border .2s"
+              }}/>
+            ${found && html`<span style=${{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:18}}>✅</span>`}
+          </div>
+
+          ${found && html`
+            <div style=${{background:"rgba(34,197,94,.12)",border:"1px solid rgba(34,197,94,.3)",borderRadius:10,padding:"14px 16px",marginBottom:16,textAlign:"left"}}>
+              <p style=${{color:"#4ade80",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Welcome!</p>
+              <p style=${{color:"#fafaf9",fontSize:15,fontWeight:700,marginBottom:2}}>${found.name}</p>
+              <p style=${{color:"#a8a29e",fontSize:13}}>${found.grade}</p>
+            </div>
+          `}
+
+          ${error && html`
+            <div style=${{background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:10,padding:"12px 14px",marginBottom:12,textAlign:"left"}}>
+              <p style=${{color:"#fca5a5",fontSize:13}}>⚠️ ${error}</p>
+            </div>
+          `}
+
+          <button
+            onClick=${submit}
+            disabled=${!found}
+            style=${{
+              width:"100%", padding:"14px 0",
+              background: found ? "#166534" : "rgba(255,255,255,.08)",
+              color: found ? "#fff" : "#57534e",
+              border:"none", borderRadius:10, fontSize:15, fontWeight:700,
+              letterSpacing:.5, transition:"all .2s",
+              cursor: found ? "pointer" : "default"
+            }}>
+            ${found ? "Begin Workshop →" : "Enter your email to continue"}
+          </button>
+        </div>
+
+        <p style=${{color:"#3d3836",fontSize:10,marginTop:24}}>Colegio Boston Flexible · ClassroomsOS</p>
+      </div>
+    </div>`;
+}
+
 // ─── Main App ─────────────────────────────────────────────
 function App() {
   const [screen, setScreen] = useState("welcome");
@@ -888,29 +1025,7 @@ function App() {
     setSubmitting(false);
   };
 
-  if(screen==="welcome") return html`
-    <div style=${{minHeight:"100vh",background:"#1c1917",display:"flex",alignItems:"center",justifyContent:"center",padding:20,fontFamily:C.sans}}>
-      <div style=${{maxWidth:420,width:"100%",textAlign:"center"}}>
-        <div style=${{fontSize:56,marginBottom:12}}>🔬</div>
-        <h1 style=${{color:"#fafaf9",fontSize:28,fontWeight:700,marginBottom:4,fontFamily:C.font}}>8th Grade Science</h1>
-        <p style=${{color:"#a8a29e",fontSize:14,marginBottom:6}}>Complete Learning Experience — 1st Term 2026</p>
-        <p style=${{color:"#78716c",fontSize:11,marginBottom:32,fontStyle:"italic"}}>Learn · Practice · Reflect · Be Evaluated</p>
-        <div style=${{background:"rgba(255,255,255,.04)",borderRadius:16,padding:"28px 24px",border:"1px solid rgba(255,255,255,.08)"}}>
-          <input value=${name} onChange=${e=>setName(e.target.value)} placeholder="Your full name"
-            style=${{width:"100%",padding:"14px 16px",border:"1.5px solid rgba(255,255,255,.1)",borderRadius:10,fontSize:15,background:"rgba(255,255,255,.04)",color:"#fafaf9",outline:"none",marginBottom:12,boxSizing:"border-box",fontFamily:C.sans}}/>
-          <select value=${grade} onChange=${e=>setGrade(e.target.value)}
-            style=${{width:"100%",padding:"14px 16px",border:"1.5px solid rgba(255,255,255,.1)",borderRadius:10,fontSize:14,background:"rgba(0,0,0,.3)",color:"#fafaf9",outline:"none",marginBottom:16,boxSizing:"border-box",fontFamily:C.sans}}>
-            <option value="8th Grade — Azul">8th Grade — Azul</option>
-            <option value="8th Grade — Rojo">8th Grade — Rojo</option>
-          </select>
-          <button onClick=${()=>{if(!name.trim())return alert("Enter your name!");setScreen("app");}}
-            style=${{width:"100%",padding:"14px 0",background:"#166534",color:"#fff",border:"none",borderRadius:10,fontSize:15,fontWeight:700,letterSpacing:.5}}>
-            Begin →
-          </button>
-        </div>
-        <p style=${{color:"#57534e",fontSize:10,marginTop:24}}>Colegio Boston Flexible · ClassroomsOS</p>
-      </div>
-    </div>`;
+  if(screen==="welcome") return html`<${LoginScreen} onLogin=${(n,g)=>{setName(n);setGrade(g);setScreen("app");}}/>`;
 
   const themeObj = C.themes[themeIdx];
   const tabs = [
