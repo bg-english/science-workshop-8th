@@ -1,14 +1,978 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>8th Grade Science Workshop — Colegio Boston Flexible</title>
-    <meta name="description" content="Complete Science Learning Experience — 1st Term 2026" />
-    <script type="module" crossorigin src="./assets/index-DHaLWzCp.js"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>8th Grade Science Workshop — Colegio Boston Flexible</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Literata:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/htm/dist/htm.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" crossorigin></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',system-ui,sans-serif;background:#1c1917;min-height:100vh}
+    input,textarea,select,button{font-family:inherit}
+    button{cursor:pointer}
+    textarea{resize:vertical}
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:#f1f0ef}
+    ::-webkit-scrollbar-thumb{background:#a8a29e;border-radius:3px}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .fade-in{animation:fadeIn .25s ease}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ╔══════════════════════════════════════════════════════╗
+// ║          CONFIGURACIÓN DE TELEGRAM                   ║
+// ║  Llena estos datos para enviar el PDF automáticamente║
+// ╚══════════════════════════════════════════════════════╝
+const TELEGRAM_BOT_TOKEN = "";   // Ej: "7123456789:AAFkj..."
+const TELEGRAM_CHAT_ID   = "";   // Ej: "123456789"
+// ═══════════════════════════════════════════════════════
+
+const html = htm.bind(React.createElement);
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── Design tokens ───────────────────────────────────────
+const C = {
+  bg:"#1c1917", dark:"#1c1917", muted:"#78716c", border:"#e7e5e4",
+  font:"'Literata',Georgia,serif", sans:"'DM Sans',system-ui,sans-serif",
+  themes:[
+    {name:"Healthy Diet",       icon:"🥗", primary:"#166534", light:"#f0fdf4", glow:"#dcfce7", verse:"1 Cor 6:19"},
+    {name:"Nervous System",     icon:"🧠", primary:"#4338ca", light:"#eef2ff", glow:"#e0e7ff", verse:"1 Cor 12:26-27"},
+    {name:"Soft Skills",        icon:"💡", primary:"#b45309", light:"#fffbeb", glow:"#fef3c7", verse:"1 Tim 3:5"},
+    {name:"Final Workshop",     icon:"📝", primary:"#dc2626", light:"#fef2f2", glow:"#fee2e2", verse:""},
+  ]
+};
+
+// ─── Learn content ───────────────────────────────────────
+const LEARN = [
+  // Theme 0 – Healthy Diet
+  [
+    {type:"intro", title:"What is a Balanced Diet?",
+     text:"A balanced diet means eating the right amounts of food from all nutrient groups to keep your body healthy. Your body needs six essential nutrients: carbohydrates, proteins, fats, vitamins, minerals, and water. Each one plays a unique role."},
+    {type:"pyramid"},
+    {type:"cards", title:"The Six Essential Nutrients", items:[
+      {emoji:"🍞",title:"Carbohydrates",desc:"Your body's MAIN source of energy. Found in bread, rice, pasta, and cereals. They fuel your brain and muscles for daily activities.",color:"#ea580c"},
+      {emoji:"🥩",title:"Proteins",desc:"Build and repair body tissues like muscles, skin, and organs. Found in meat, fish, eggs, beans, and nuts. Essential for growth during adolescence.",color:"#ef4444"},
+      {emoji:"🧈",title:"Fats",desc:"Store energy, insulate your body, and protect organs. Found in oils, butter, nuts. Your body needs healthy fats — but in moderation.",color:"#f59e0b"},
+      {emoji:"🍊",title:"Vitamins",desc:"Regulate body processes and boost immunity. Vitamin C fights infections, Vitamin A helps eyesight, Vitamin D strengthens bones. Found in fruits and vegetables.",color:"#22c55e"},
+      {emoji:"⚙️",title:"Minerals",desc:"Calcium strengthens bones and teeth. Iron carries oxygen in blood. Potassium helps muscles and nerves. Found in dairy, leafy greens, and nuts.",color:"#3b82f6"},
+      {emoji:"💧",title:"Water",desc:"Carries nutrients, regulates body temperature, and removes waste. Your body is ~60% water. Drink 6–8 glasses daily to stay hydrated.",color:"#06b6d4"},
+    ]},
+    {type:"alert", title:"⚠️ Eating Disorders — What You Need to Know",
+     text:"Eating disorders are serious mental health conditions that affect how people eat and think about food. They are NOT a choice — they are illnesses that need professional help."},
+    {type:"cards", title:"Types of Eating Disorders", items:[
+      {emoji:"🚫",title:"Anorexia Nervosa",desc:"Intense fear of gaining weight leading to severe food restriction. The person sees themselves as overweight even when dangerously thin. Warning signs: extreme weight loss, refusing to eat, over-exercising.",color:"#dc2626"},
+      {emoji:"🔄",title:"Bulimia Nervosa",desc:"Cycles of binge eating (consuming large amounts) followed by purging (forced vomiting, laxatives). Warning signs: eating in secret, frequent bathroom trips after meals, damaged teeth.",color:"#9333ea"},
+      {emoji:"😔",title:"Binge Eating Disorder",desc:"Eating large amounts of food in a short time without control, but without purging. Often leads to guilt and shame. Warning signs: eating when not hungry, eating alone due to embarrassment.",color:"#2563eb"},
+    ]},
+    {type:"info", title:"Warning Signs to Watch For",
+     text:"Skipping meals regularly • Lying about eating • Obsessing over calories or weight • Withdrawing from friends and family • Dramatic weight changes • Excessive exercise • Negative body talk. If you notice these signs in yourself or a friend, talk to a trusted adult."},
+  ],
+  // Theme 1 – Nervous System
+  [
+    {type:"intro", title:"The Central Nervous System (CNS)",
+     text:"The Central Nervous System is your body's command center. It consists of two main parts: the BRAIN and the SPINAL CORD. Together, they process information, control movements, regulate body functions, and enable you to think, learn, and feel emotions."},
+    {type:"brainImg"},
+    {type:"cards", title:"Parts of the Brain", items:[
+      {emoji:"🧠",title:"Cerebrum",desc:"The largest part (~85% of brain weight). Divided into left and right hemispheres. Controls thinking, memory, speech, voluntary movements, and personality. It's what makes you YOU.",color:"#4338ca"},
+      {emoji:"⚖️",title:"Cerebellum",desc:"Located at the back of the brain. Coordinates balance, posture, and fine motor skills. Without it, you couldn't walk straight, catch a ball, or write your name.",color:"#d97706"},
+      {emoji:"💚",title:"Brain Stem",desc:"Connects brain to spinal cord. Controls automatic functions you don't think about: breathing, heart rate, swallowing, sleeping. Damage here is life-threatening.",color:"#16a34a"},
+      {emoji:"📡",title:"Thalamus",desc:"The brain's relay station. All sensory information (except smell) passes through here before reaching the cortex. Think of it as the brain's post office.",color:"#7c3aed"},
+      {emoji:"🌡️",title:"Hypothalamus",desc:"Regulates hunger, thirst, temperature, sleep cycles, and hormones. It's why you feel hungry when your blood sugar drops or sleepy when it gets dark.",color:"#db2777"},
+      {emoji:"🛣️",title:"Spinal Cord",desc:"The highway connecting brain to body. Carries motor commands DOWN from brain and sensory information UP from the body. Also controls reflex actions.",color:"#0891b2"},
+    ]},
+    {type:"neuronImg"},
+    {type:"info", title:"How Neurons Communicate",
+     text:"1) Dendrites RECEIVE signals from other neurons or sensory receptors. 2) The signal travels as an ELECTRICAL IMPULSE along the axon. 3) Myelin sheath speeds up the signal (like insulation on a wire). 4) At the axon terminals, NEUROTRANSMITTERS (chemical messengers) are released. 5) These cross the SYNAPSE (tiny gap) and bind to the next neuron's receptors. The entire process takes milliseconds!"},
+    {type:"alert", title:"🏥 Diseases of the Central Nervous System",
+     text:"The CNS can be affected by various diseases. Understanding them helps us appreciate how complex and precious our nervous system is."},
+    {type:"cards", title:"CNS Diseases", items:[
+      {emoji:"🧓",title:"Alzheimer's Disease",desc:"Progressive memory loss and confusion, mainly affecting elderly people. Brain cells die gradually. No cure yet, but early detection helps manage symptoms.",color:"#6b7280"},
+      {emoji:"🤲",title:"Parkinson's Disease",desc:"Tremors, stiffness, and difficulty with movement. Caused by loss of neurons that produce dopamine. Muhammad Ali and Michael J. Fox brought global awareness.",color:"#4338ca"},
+      {emoji:"⚡",title:"Epilepsy",desc:"Sudden electrical disturbances in the brain cause seizures. Can be managed with medication. Not contagious — it's a neurological condition, not something to fear.",color:"#dc2626"},
+      {emoji:"🛡️",title:"Multiple Sclerosis (MS)",desc:"The immune system attacks the myelin sheath, slowing or blocking nerve signals. Symptoms come and go. Research is advancing rapidly.",color:"#d97706"},
+    ]},
+  ],
+  // Theme 2 – Soft Skills
+  [
+    {type:"intro", title:"What Are Soft Skills?",
+     text:"Soft skills are personal qualities that help you interact effectively with others. Unlike HARD SKILLS (specific technical abilities like coding or playing piano), soft skills are transferable — you use them everywhere: school, home, friendships, and your future career. Studies show that 85% of job success comes from soft skills."},
+    {type:"skillsWheel"},
+    {type:"cards", title:"The 8 Core Soft Skills", items:[
+      {emoji:"🗣️",title:"Communication",desc:"Expressing your ideas clearly AND listening actively to others. It's not just about talking — it's about being understood and understanding. Good communicators ask questions, make eye contact, and adapt their message.",color:"#ef4444"},
+      {emoji:"🤝",title:"Teamwork",desc:"Working with others towards a shared goal. It means contributing your strengths, supporting others' weaknesses, sharing credit, and handling disagreements respectfully.",color:"#f59e0b"},
+      {emoji:"👑",title:"Leadership",desc:"NOT about being the boss — it's about inspiring others, making decisions, taking responsibility, and serving your team. A true leader listens more than they speak.",color:"#22c55e"},
+      {emoji:"❤️",title:"Empathy",desc:"Understanding and sharing another person's feelings. Walking in someone else's shoes before judging. Empathy builds trust, reduces conflict, and creates strong relationships.",color:"#ec4899"},
+      {emoji:"🔄",title:"Adaptability",desc:"Being flexible when things don't go as planned. The world changes constantly — adaptable people thrive because they adjust, learn new approaches, and stay calm under pressure.",color:"#3b82f6"},
+      {emoji:"💡",title:"Problem-Solving",desc:"Analyzing challenges and finding creative solutions. It's not about having all the answers — it's about asking the right questions and trying different approaches until something works.",color:"#8b5cf6"},
+      {emoji:"💪",title:"Resilience",desc:"The ability to recover from setbacks, failures, and difficulties. Resilient people don't avoid hardship — they learn from it and come back stronger. Every failure is a lesson.",color:"#06b6d4"},
+      {emoji:"🎨",title:"Creativity",desc:"Thinking outside the box and generating original ideas. Creativity isn't just for artists — it's for problem-solvers, leaders, and anyone who wants to make a difference.",color:"#f97316"},
+    ]},
+    {type:"info", title:"Soft Skills vs. Hard Skills",
+     text:"HARD SKILLS are teachable, measurable abilities: programming, playing an instrument, speaking a foreign language, solving equations. SOFT SKILLS are interpersonal qualities: communication, empathy, leadership, teamwork. The key difference? Hard skills get you the interview. Soft skills get you the job — and help you keep it."},
+  ],
+];
+
+// ─── Practice activities ──────────────────────────────────
+const PRACTICE = [
+  // Theme 0
+  [
+    {id:"p0_match", type:"matching", icon:"🔗", label:"Practice: Match Nutrient → Function",
+     hint:"Think about what each nutrient does INSIDE your body. Proteins build, carbs fuel, fats store.",
+     left:["Proteins","Carbohydrates","Fats","Vitamins","Minerals","Water"],
+     right:["Build and repair tissues","Main energy source","Store energy & insulate","Regulate processes & immunity","Strengthen bones & blood","Hydrate cells & transport"],
+     correct:{Proteins:"Build and repair tissues",Carbohydrates:"Main energy source",Fats:"Store energy & insulate",Vitamins:"Regulate processes & immunity",Minerals:"Strengthen bones & blood",Water:"Hydrate cells & transport"}},
+    {id:"p0_mc", type:"mc", icon:"📝", label:"Practice: Eating Disorders Quiz",
+     hint:"Remember: Anorexia = restriction, Bulimia = binge+purge, Binge Eating = binge without purge.",
+     questions:[
+       {q:"Which disorder involves intense fear of gaining weight and severe food restriction?",opts:["Bulimia Nervosa","Anorexia Nervosa","Binge Eating"],ans:1},
+       {q:"Bulimia Nervosa is characterized by:",opts:["Only restricting food","Binge eating followed by purging","Eating normally"],ans:1},
+       {q:"Which is a warning sign of an eating disorder?",opts:["Eating three meals a day","Enjoying different foods","Skipping meals and lying about eating"],ans:2},
+     ]},
+    {id:"p0_fill", type:"fill", icon:"✏️", label:"Practice: Complete the Sentence",
+     hint:"Use the food pyramid! The bottom has what we need MOST, the top has what we need LEAST.",
+     bank:["proteins","carbohydrates","vitamins","balanced","water"],
+     sentences:[
+       {text:"A ______ diet includes nutrients from all food groups.",ans:"balanced"},
+       {text:"Bread and rice are rich in ______, our main energy source.",ans:"carbohydrates"},
+       {text:"Meat and eggs provide ______ for muscle growth.",ans:"proteins"},
+       {text:"Fruits give us ______ to regulate body processes.",ans:"vitamins"},
+     ]},
+  ],
+  // Theme 1
+  [
+    {id:"p1_label", type:"matching", icon:"🧠", label:"Practice: Brain Part → Function",
+     hint:"Cerebrum = thinking, Cerebellum = balance, Brain Stem = automatic survival functions.",
+     left:["Cerebrum","Cerebellum","Brain Stem","Spinal Cord","Thalamus","Hypothalamus"],
+     right:["Thinking & memory","Balance & coordination","Breathing & heart rate","Message highway to body","Sensory relay station","Hunger & temperature"],
+     correct:{Cerebrum:"Thinking & memory",Cerebellum:"Balance & coordination","Brain Stem":"Breathing & heart rate","Spinal Cord":"Message highway to body",Thalamus:"Sensory relay station",Hypothalamus:"Hunger & temperature"}},
+    {id:"p1_mc", type:"mc", icon:"📝", label:"Practice: CNS Diseases",
+     hint:"Associate each disease with its KEY symptom: Alzheimer's=memory, Parkinson's=tremors, Epilepsy=seizures.",
+     questions:[
+       {q:"Which disease causes progressive memory loss?",opts:["Parkinson's","Epilepsy","Alzheimer's"],ans:2},
+       {q:"Parkinson's Disease is caused by:",opts:["Loss of dopamine neurons","Virus infection","Broken bones"],ans:0},
+       {q:"The myelin sheath's main function is to:",opts:["Store memories","Speed up nerve impulses","Produce hormones"],ans:1},
+       {q:"The CNS consists of:",opts:["Brain and nerves","Brain and spinal cord","Heart and brain"],ans:1},
+     ]},
+    {id:"p1_fill", type:"fill", icon:"✏️", label:"Practice: Neuron Communication",
+     hint:"Follow the signal path: dendrites → cell body → axon → terminals → synapse → next neuron.",
+     bank:["dendrites","axon","synapse","neurotransmitters","electrical"],
+     sentences:[
+       {text:"______ receive signals from other neurons.",ans:"dendrites"},
+       {text:"The signal travels along the ______ as an impulse.",ans:"axon"},
+       {text:"The gap between two neurons is called the ______.",ans:"synapse"},
+       {text:"Chemical messengers called ______ cross this gap.",ans:"neurotransmitters"},
+       {text:"Inside a neuron, the signal is ______.",ans:"electrical"},
+     ]},
+  ],
+  // Theme 2
+  [
+    {id:"p2_sort", type:"sort", icon:"📂", label:"Practice: Soft Skill or Hard Skill?",
+     hint:"If you can learn it from a textbook and measure it with a test → Hard Skill. If it's about how you interact with people → Soft Skill.",
+     items:[
+       {text:"Teamwork",ans:"Soft"},{text:"Coding in Python",ans:"Hard"},
+       {text:"Empathy",ans:"Soft"},{text:"Playing guitar",ans:"Hard"},
+       {text:"Leadership",ans:"Soft"},{text:"Solving equations",ans:"Hard"},
+       {text:"Time management",ans:"Soft"},{text:"Speaking French",ans:"Hard"},
+     ]},
+    {id:"p2_match", type:"matching", icon:"🔗", label:"Practice: Skill → Real-Life Example",
+     hint:"Think about WHAT each skill looks like in action — not just its definition.",
+     left:["Communication","Teamwork","Empathy","Adaptability","Problem-solving","Leadership"],
+     right:["Expressing ideas clearly in discussion","Collaborating to finish a project","Listening without judging","Adjusting plans when things change","Finding creative solutions","Organizing and motivating a team"],
+     correct:{Communication:"Expressing ideas clearly in discussion",Teamwork:"Collaborating to finish a project",Empathy:"Listening without judging",Adaptability:"Adjusting plans when things change","Problem-solving":"Finding creative solutions",Leadership:"Organizing and motivating a team"}},
+    {id:"p2_mc", type:"mc", icon:"📝", label:"Practice: Skills in Action",
+     hint:"Focus on which skill best fits each SCENARIO, not just the definition.",
+     questions:[
+       {q:"The most important skill for resolving a conflict is:",opts:["Physical strength","Empathy & communication","Programming"],ans:1},
+       {q:"A good leader should:",opts:["Do everything alone","Listen, delegate, and motivate","Avoid decisions"],ans:1},
+       {q:"85% of job success comes from:",opts:["Hard skills","Soft skills","Luck"],ans:1},
+     ]},
+  ],
+];
+
+// ─── Biblical content ─────────────────────────────────────
+const BIBLICAL = [
+  {
+    verse:"1 Corinthians 6:19",
+    text:"Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God? You are not your own.",
+    context:"Paul wrote this to the Corinthians to remind them that God lives IN them through the Holy Spirit. If our body is God's temple, then what we eat, how we treat our body, and how we think about ourselves — all of it matters to God.",
+    connection:"This verse connects directly to healthy eating. When we eat a balanced diet, we're not just taking care of ourselves — we're caring for the place where God's Spirit dwells. Eating disorders, unhealthy habits, and self-destruction go against God's design for us.",
+    exampleReflection:"Our bodies are not our own — they belong to God. When I choose to eat healthy foods and avoid harmful habits, I am honoring God by taking care of the temple He gave me. This means I should respect my body, not abuse it with extreme diets or junk food, and I should also help others who may be struggling with eating disorders by pointing them to professional help.",
+    prompt:"How does knowing your body is God's temple change the way you think about food and health?",
+  },
+  {
+    verse:"1 Corinthians 12:26-27",
+    text:"If one part suffers, every part suffers with it; if one part is honored, every part rejoices with it. Now you are the body of Christ, and each one of you is a part of it.",
+    context:"Paul uses the human body as a metaphor for the church. Just like your brain, spinal cord, and neurons all work together — if one part is damaged, the whole system is affected.",
+    connection:"The nervous system is a perfect example: when one neuron is damaged, the signal can't reach its destination, affecting the entire body. Similarly, when one person in our community suffers, we all feel it. When one person is celebrated, we all rejoice.",
+    exampleReflection:"The nervous system shows us that no part works alone — the brain needs the spinal cord, and the spinal cord needs healthy neurons. In the same way, our classroom and community is like a body where every person matters. If a classmate is struggling, I should care and help, because their pain affects all of us.",
+    prompt:"How is the nervous system similar to a community? What happens when one 'part' is hurting?",
+  },
+  {
+    verse:"1 Timothy 3:5",
+    text:"If anyone does not know how to manage his own family, how can he take care of God's church?",
+    context:"Paul wrote to Timothy about the qualities needed for leadership in the church. But the principle applies to everyone: before you can lead or serve others, you need to develop the skills to manage your own responsibilities.",
+    connection:"Soft skills like leadership, communication, empathy, and teamwork are exactly the skills Paul is describing. You can't lead a church (or a team, or a family) without knowing how to communicate, solve problems, show empathy, and be resilient.",
+    exampleReflection:"This verse teaches me that the soft skills we learn now — communication, empathy, leadership — are not just for school. They are training for life. If I can learn to manage my responsibilities, communicate well with my family, and show empathy to my classmates, then I am preparing myself to serve God and others.",
+    prompt:"Which 2 soft skills do you most need to develop? How will they help you serve God and others?",
+  },
+];
+
+// ─── Workshop questions ───────────────────────────────────
+const WORKSHOP = [
+  // Theme 0
+  [
+    {id:"w0_mc1",type:"mc",q:"Which nutrient is the body's PRIMARY source of energy?",opts:["Proteins","Fats","Carbohydrates","Vitamins"],ans:2,pts:2},
+    {id:"w0_mc2",type:"mc",q:"Anorexia Nervosa is characterized by:",opts:["Binge eating without purging","Severe food restriction and fear of weight gain","Eating only organic food","Normal eating patterns"],ans:1,pts:2},
+    {id:"w0_mc3",type:"mc",q:"Which vitamin helps strengthen your immune system?",opts:["Vitamin D","Vitamin K","Vitamin C","Vitamin B12"],ans:2,pts:2},
+    {id:"w0_mc4",type:"mc",q:"A person with Bulimia Nervosa typically:",opts:["Avoids all food","Binges and then purges","Only eats vegetables","Exercises normally"],ans:1,pts:2},
+    {id:"w0_mc5",type:"mc",q:"The function of minerals in the body includes:",opts:["Providing quick energy","Strengthening bones and helping blood carry oxygen","Insulating the body","Storing fat"],ans:1,pts:2},
+    {id:"w0_fill",type:"fill",q:"Complete: A ______ diet includes the right amounts of nutrients from all food groups.",ans:"balanced",pts:3},
+    {id:"w0_open",type:"open",q:"Read 1 Corinthians 6:19. In your own words (4–6 sentences), explain how this verse connects to maintaining a healthy diet. Include: what the verse means, how it applies to food choices, and what it teaches about eating disorders.",pts:10},
+  ],
+  // Theme 1
+  [
+    {id:"w1_mc1",type:"mc",q:"The Central Nervous System consists of:",opts:["Brain and muscles","Brain and spinal cord","Heart and brain","Spinal cord and nerves"],ans:1,pts:2},
+    {id:"w1_mc2",type:"mc",q:"Which brain part controls balance and coordination?",opts:["Cerebrum","Brain Stem","Cerebellum","Thalamus"],ans:2,pts:2},
+    {id:"w1_mc3",type:"mc",q:"Neurotransmitters are:",opts:["Types of blood cells","Chemical messengers between neurons","Bones in the spine","Muscles in the brain"],ans:1,pts:2},
+    {id:"w1_mc4",type:"mc",q:"Alzheimer's Disease primarily affects:",opts:["Muscles","Memory and cognition","Hearing","Bones"],ans:1,pts:2},
+    {id:"w1_mc5",type:"mc",q:"The myelin sheath's function is to:",opts:["Store memories","Produce hormones","Speed up nerve impulses","Filter blood"],ans:2,pts:2},
+    {id:"w1_fill",type:"fill",q:"Complete: The gap between two neurons where chemical signals cross is called the ______.",ans:"synapse",pts:3},
+    {id:"w1_open",type:"open",q:"Read 1 Corinthians 12:26-27. In your own words (4–6 sentences), explain how the nervous system is like a community. Include: how damage to one part affects the whole, and what this teaches about caring for each other.",pts:10},
+  ],
+  // Theme 2
+  [
+    {id:"w2_mc1",type:"mc",q:"Soft skills are BEST described as:",opts:["Technical abilities you learn in class","Personal qualities for interacting with others","Physical fitness skills","Computer programming abilities"],ans:1,pts:2},
+    {id:"w2_mc2",type:"mc",q:"Which is an example of ADAPTABILITY?",opts:["Refusing to change plans","Switching to a poster when the projector breaks","Complaining about changes","Waiting for others to fix it"],ans:1,pts:2},
+    {id:"w2_mc3",type:"mc",q:"Which percentage of job success comes from soft skills?",opts:["25%","50%","85%","100%"],ans:2,pts:2},
+    {id:"w2_mc4",type:"mc",q:"Empathy means:",opts:["Ignoring others' feelings","Understanding and sharing another person's feelings","Being the loudest in the group","Always agreeing with everyone"],ans:1,pts:2},
+    {id:"w2_mc5",type:"mc",q:"A TRUE leader:",opts:["Does all the work alone","Avoids responsibility","Listens, delegates, and motivates","Only follows orders"],ans:2,pts:2},
+    {id:"w2_fill",type:"fill",q:"Complete: The ability to recover from setbacks and keep going is called ______.",ans:"resilience",pts:3},
+    {id:"w2_open",type:"open",q:"Read 1 Timothy 3:5. In your own words (4–6 sentences), choose 2 soft skills you want to develop. Explain why these matter for your life and how they prepare you to serve God and your community.",pts:10},
+  ],
+];
+
+const TOTAL_PTS = WORKSHOP.flat().reduce((s,q)=>s+q.pts,0);
+
+// ─── Helpers ──────────────────────────────────────────────
+const scoreTheme = (questions, answers) =>
+  questions.reduce((s,q) => {
+    if(q.type==="mc")  return s + (answers[q.id]===q.ans ? q.pts : 0);
+    if(q.type==="fill") return s + ((answers[q.id]||"").trim().toLowerCase()===q.ans.toLowerCase() ? q.pts : 0);
+    if(q.type==="open"){
+      const len=(answers[q.id]||"").trim().length;
+      return s + (len>40?q.pts:len>10?Math.floor(q.pts*.6):0);
+    }
+    return s;
+  }, 0);
+
+// ─── Telegram sender ──────────────────────────────────────
+async function sendToTelegram(blob, studentName, grade) {
+  if(!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return {ok:false, reason:"not_configured"};
+  try {
+    const form = new FormData();
+    form.append("chat_id", TELEGRAM_CHAT_ID);
+    form.append("document", blob, `Science_Workshop_${studentName.replace(/\s+/g,"_")}.pdf`);
+    form.append("caption", `📚 *Science Workshop PDF*\n👤 ${studentName}\n🏫 ${grade}\n📅 ${new Date().toLocaleDateString("es-AR")}`);
+    form.append("parse_mode","Markdown");
+    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`,{method:"POST",body:form});
+    const data = await res.json();
+    return {ok:data.ok, reason:data.ok?"sent":data.description};
+  } catch(e) {
+    return {ok:false, reason:e.message};
+  }
+}
+
+// ─── PDF Generator ────────────────────────────────────────
+function generatePDF(name, grade, answers, scores) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:"pt", format:"a4"});
+  const W=595, M=40, CW=W-2*M;
+  let y=M;
+  const nl=(h)=>{ if(y+h>800){doc.addPage();y=M;} };
+
+  // Cover page
+  doc.setFillColor(28,25,23);
+  doc.rect(0,0,W,842,"F");
+  doc.setFillColor(22,101,52);
+  doc.rect(0,355,W,6,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(34);
+  doc.text("8th Grade Science",W/2,180,{align:"center"});
+  doc.setFontSize(16);
+  doc.setFont("helvetica","normal");
+  doc.text("Final Workshop — 1st Term 2026",W/2,218,{align:"center"});
+  doc.setFontSize(14);
+  doc.text(`Student: ${name}`,W/2,400,{align:"center"});
+  doc.text(`Grade: ${grade}`,W/2,424,{align:"center"});
+  doc.text(`Date: ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}`,W/2,448,{align:"center"});
+  const total = scores.reduce((a,b)=>a+b,0);
+  const pct = Math.round(total/TOTAL_PTS*100);
+  doc.setFontSize(26);
+  doc.setFont("helvetica","bold");
+  doc.setTextColor(34,197,94);
+  doc.text(`Score: ${total} / ${TOTAL_PTS}`,W/2,520,{align:"center"});
+  doc.setFontSize(13);
+  doc.setFont("helvetica","normal");
+  doc.setTextColor(180,180,180);
+  doc.text(`${pct}% — ${pct>=90?"Outstanding!":pct>=75?"Great work!":pct>=60?"Good effort!":"Keep studying!"}`,W/2,548,{align:"center"});
+  doc.setFontSize(10);
+  doc.setTextColor(120,120,120);
+  doc.text("Colegio Boston Flexible — ClassroomsOS",W/2,778,{align:"center"});
+  doc.text('"Year of Purity" — Genesis 1:27-28a TLA',W/2,796,{align:"center"});
+
+  const themeColors=[[22,101,52],[67,56,202],[180,83,9]];
+  const themeNames=["THEME 1: Healthy Diet & Nutrition","THEME 2: Central Nervous System","THEME 3: Soft Skills for Life"];
+  const themeVerses=["1 Corinthians 6:19","1 Corinthians 12:26-27","1 Timothy 3:5"];
+
+  WORKSHOP.forEach((qs, ti) => {
+    doc.addPage();
+    doc.setFillColor(...themeColors[ti]);
+    doc.rect(0,0,W,70,"F");
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(16);
+    doc.setFont("helvetica","bold");
+    doc.text(themeNames[ti],W/2,28,{align:"center"});
+    doc.setFontSize(10);
+    doc.setFont("helvetica","normal");
+    doc.text(`Biblical Principle: ${themeVerses[ti]}`,W/2,46,{align:"center"});
+    doc.text(`Score: ${scores[ti]} points`,W/2,62,{align:"center"});
+    y=90;
+
+    // Add brain image for theme 1
+    if(ti===1) {
+      try {
+        const imgEl = document.getElementById("img-brain-pdf");
+        if(imgEl) { doc.addImage(imgEl,"JPEG",M+60,y,CW-120,160); y+=175; }
+      } catch(e){}
+    }
+
+    qs.forEach(q => {
+      nl(80);
+      doc.setFontSize(11);
+      doc.setFont("helvetica","bold");
+      doc.setTextColor(28,25,23);
+      const icon = q.type==="open"?"📝":q.type==="fill"?"✏️":"📋";
+      doc.splitTextToSize(`${q.q}`,CW-10).forEach(line=>{nl(16);doc.text(line,M+5,y+12);y+=15;});
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(10);
+      y+=4;
+      const ans = answers[q.id];
+      if(q.type==="mc"){
+        const chosen=typeof ans==="number"?q.opts[ans]:"(not answered)";
+        const correct=q.opts[q.ans];
+        const ok=ans===q.ans;
+        doc.setTextColor(ok?22:200,ok?101:50,ok?52:50);
+        doc.text(`${ok?"✓":"✗"} Your answer: ${chosen}`,M+10,y+10);y+=16;
+        if(!ok){doc.setTextColor(22,101,52);doc.text(`  Correct: ${correct}`,M+10,y+10);y+=16;}
+      } else if(q.type==="fill"){
+        const ok=(ans||"").trim().toLowerCase()===q.ans.toLowerCase();
+        doc.setTextColor(ok?22:200,ok?101:50,ok?52:50);
+        doc.text(`${ok?"✓":"✗"} Your answer: ${ans||"(blank)"}`,M+10,y+10);y+=16;
+        if(!ok){doc.setTextColor(22,101,52);doc.text(`  Correct: ${q.ans}`,M+10,y+10);y+=16;}
+      } else {
+        doc.setTextColor(50,50,50);
+        doc.splitTextToSize(ans||"(not answered)",CW-20).forEach(line=>{nl(14);doc.text(line,M+10,y+10);y+=14;});
+      }
+      doc.setTextColor(150,150,150);
+      doc.setFontSize(9);
+      doc.text(`[${q.pts} pts]`,W-M,y+4,{align:"right"});
+      y+=16;
+      doc.setDrawColor(230,230,230);
+      doc.line(M,y,W-M,y);
+      y+=10;
+    });
+  });
+
+  // Final page
+  doc.addPage();
+  doc.setFillColor(28,25,23);
+  doc.rect(0,0,W,842,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(24);
+  doc.setFont("helvetica","bold");
+  doc.text("Workshop Complete!",W/2,250,{align:"center"});
+  doc.setFontSize(14);
+  doc.setFont("helvetica","normal");
+  doc.text(`${name} — ${grade}`,W/2,290,{align:"center"});
+  doc.setFontSize(30);
+  doc.setTextColor(34,197,94);
+  doc.text(`${total} / ${TOTAL_PTS} (${pct}%)`,W/2,350,{align:"center"});
+  doc.setFontSize(11);
+  doc.setTextColor(180,180,180);
+  doc.text("Send this PDF to Prof. Ortiz as evidence of completion.",W/2,410,{align:"center"});
+  doc.setTextColor(100,100,100);
+  doc.setFontSize(9);
+  doc.text("1 Cor 6:19 · 1 Cor 12:26-27 · 1 Tim 3:5",W/2,500,{align:"center"});
+  return doc;
+}
+
+// ─── SVG Components ───────────────────────────────────────
+function FoodPyramid() {
+  return html`<svg viewBox="0 0 500 380" style=${{width:"100%",maxWidth:480}}>
+    <defs>
+      <linearGradient id="gFats" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#f59e0b"/>
+      </linearGradient>
+      <linearGradient id="gProt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#fca5a5"/><stop offset="100%" stopColor="#ef4444"/>
+      </linearGradient>
+      <linearGradient id="gDairy" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#93c5fd"/><stop offset="100%" stopColor="#3b82f6"/>
+      </linearGradient>
+      <linearGradient id="gVeg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#86efac"/><stop offset="100%" stopColor="#22c55e"/>
+      </linearGradient>
+      <linearGradient id="gGrain" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#fdba74"/><stop offset="100%" stopColor="#ea580c"/>
+      </linearGradient>
+    </defs>
+    <polygon points="250,20 205,100 295,100" fill="url(#gFats)" stroke="#fff" strokeWidth="2"/>
+    <polygon points="205,105 170,175 330,175 295,105" fill="url(#gProt)" stroke="#fff" strokeWidth="2"/>
+    <polygon points="170,180 140,240 360,240 330,180" fill="url(#gDairy)" stroke="#fff" strokeWidth="2"/>
+    <polygon points="140,245 105,310 395,310 360,245" fill="url(#gVeg)" stroke="#fff" strokeWidth="2"/>
+    <polygon points="105,315 75,370 425,370 395,315" fill="url(#gGrain)" stroke="#fff" strokeWidth="2"/>
+    <text x="250" y="70" textAnchor="middle" fill="#92400e" fontSize="11" fontWeight="700">Fats & Oils</text>
+    <text x="250" y="85" textAnchor="middle" fill="#92400e" fontSize="9">Use sparingly</text>
+    <text x="250" y="143" textAnchor="middle" fill="#7f1d1d" fontSize="12" fontWeight="700">Proteins</text>
+    <text x="250" y="158" textAnchor="middle" fill="#7f1d1d" fontSize="9">Meat · Fish · Eggs · Beans</text>
+    <text x="250" y="213" textAnchor="middle" fill="#1e3a5f" fontSize="12" fontWeight="700">Dairy & Minerals</text>
+    <text x="250" y="228" textAnchor="middle" fill="#1e3a5f" fontSize="9">Milk · Cheese · Yogurt · Ca + Fe</text>
+    <text x="250" y="280" textAnchor="middle" fill="#14532d" fontSize="12" fontWeight="700">Fruits & Vegetables</text>
+    <text x="250" y="295" textAnchor="middle" fill="#14532d" fontSize="9">Vitamins A, C, K · Fiber · Antioxidants</text>
+    <text x="250" y="348" textAnchor="middle" fill="#7c2d12" fontSize="12" fontWeight="700">Grains & Carbohydrates</text>
+    <text x="250" y="363" textAnchor="middle" fill="#7c2d12" fontSize="9">Bread · Rice · Pasta · Cereals — Main energy source</text>
+    <line x1="38" y1="50" x2="38" y2="370" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round"/>
+    <text x="32" y="210" textAnchor="middle" fill="#0369a1" fontSize="11" fontWeight="700" transform="rotate(-90,32,210)">💧 WATER — Drink 6-8 glasses daily</text>
+  </svg>`;
+}
+
+function SkillsWheel() {
+  const skills=[
+    {name:"Communication",emoji:"🗣️",color:"#ef4444"},
+    {name:"Teamwork",emoji:"🤝",color:"#f59e0b"},
+    {name:"Leadership",emoji:"👑",color:"#22c55e"},
+    {name:"Empathy",emoji:"❤️",color:"#ec4899"},
+    {name:"Adaptability",emoji:"🔄",color:"#3b82f6"},
+    {name:"Problem-solving",emoji:"💡",color:"#8b5cf6"},
+    {name:"Resilience",emoji:"💪",color:"#06b6d4"},
+    {name:"Creativity",emoji:"🎨",color:"#f97316"},
+  ];
+  const cx=250,cy=190,r=140;
+  return html`<svg viewBox="0 0 500 380" style=${{width:"100%",maxWidth:460}}>
+    <circle cx=${cx} cy=${cy} r=${r+20} fill="none" stroke="#e7e5e0" strokeWidth="1" strokeDasharray="4,4"/>
+    <circle cx=${cx} cy=${cy} r="35" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/>
+    <text x=${cx} y=${cy-5} textAnchor="middle" fill="#92400e" fontSize="9" fontWeight="700">SOFT</text>
+    <text x=${cx} y=${cy+8} textAnchor="middle" fill="#92400e" fontSize="9" fontWeight="700">SKILLS</text>
+    ${skills.map((s,i)=>{
+      const angle=i/skills.length*Math.PI*2-Math.PI/2;
+      const sx=cx+Math.cos(angle)*r, sy=cy+Math.sin(angle)*r;
+      return html`<g key=${s.name}>
+        <line x1=${cx+Math.cos(angle)*40} y1=${cy+Math.sin(angle)*40} x2=${sx} y2=${sy} stroke=${s.color} strokeWidth="2" opacity="0.3"/>
+        <circle cx=${sx} cy=${sy} r="30" fill="#fff" stroke=${s.color} strokeWidth="2.5"/>
+        <text x=${sx} y=${sy-4} textAnchor="middle" fontSize="16">${s.emoji}</text>
+        <text x=${sx} y=${sy+14} textAnchor="middle" fill=${s.color} fontSize="8" fontWeight="700">${s.name}</text>
+      </g>`;
+    })}
+  </svg>`;
+}
+
+// ─── Activity components ──────────────────────────────────
+function MatchingActivity({act, onComplete}) {
+  const [sel, setSel] = useState({});
+  const [checked, setChecked] = useState(false);
+  const [hint, setHint] = useState(false);
+  const leftItems = act.left;
+  const rightItems = [...act.right].sort(()=>Math.random()-.5);
+  const [shuffled] = useState(rightItems);
+  const allDone = leftItems.every(l=>sel[l]);
+
+  const check = () => {
+    setChecked(true);
+    if(leftItems.every(l=>sel[l]===act.correct[l])) setTimeout(()=>onComplete(true),600);
+  };
+  return html`<div>
+    ${hint&&html`<div style=${{padding:"10px 14px",background:"#fef9c3",borderRadius:8,fontSize:12,color:"#854d0e",marginBottom:12,borderLeft:"3px solid #eab308"}}>💡 ${act.hint}</div>`}
+    <div style=${{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
+      <div>
+        <p style=${{fontSize:10,fontWeight:700,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>Match from here</p>
+        ${leftItems.map(l=>{
+          const ok=checked&&sel[l]===act.correct[l], bad=checked&&sel[l]&&sel[l]!==act.correct[l];
+          return html`<div key=${l} onClick=${()=>!checked&&setSel(p=>({...p,[l]:null}))}
+            style=${{padding:"8px 10px",marginBottom:4,borderRadius:8,border:ok?"2px solid #16a34a":bad?"2px solid #dc2626":sel[l]?"2px solid #4338ca":"1.5px solid #ddd",background:ok?"#dcfce7":bad?"#fee2e2":sel[l]?"#eef2ff":"#fff",fontSize:12,fontWeight:600,cursor:"default"}}>
+            ${ok?"✅ ":bad?"❌ ":""} ${l}
+            ${sel[l]&&html`<span style=${{display:"block",fontSize:10,color:"#666",fontWeight:400}}>→ ${sel[l]}</span>`}
+          </div>`;
+        })}
+      </div>
+      <div>
+        <p style=${{fontSize:10,fontWeight:700,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>…to here</p>
+        ${shuffled.map(r=>{
+          const used=Object.values(sel).includes(r);
+          const nextLeft=leftItems.find(l=>!sel[l]);
+          return html`<div key=${r} onClick=${()=>{if(checked||used||!nextLeft)return;setSel(p=>({...p,[nextLeft]:r}));}}
+            style=${{padding:"8px 10px",marginBottom:4,borderRadius:8,border:used?"1.5px solid #ddd":"1.5px solid #a78bfa",background:used?"#f5f5f4":"#f5f3ff",fontSize:12,cursor:checked||used||!nextLeft?"default":"pointer",opacity:used?.5:1}}>
+            ${r}
+          </div>`;
+        })}
+      </div>
+    </div>
+    <div style=${{display:"flex",gap:8,flexWrap:"wrap"}}>
+      <button onClick=${()=>setHint(true)} style=${{padding:"8px 16px",background:"#fef9c3",border:"1px solid #eab308",borderRadius:8,fontSize:12,color:"#854d0e"}}>💡 Hint</button>
+      <button onClick=${()=>{setSel({});setChecked(false);}} style=${{padding:"8px 16px",background:"#f5f5f4",border:"1px solid #ddd",borderRadius:8,fontSize:12,color:"#666"}}>↺ Reset</button>
+      ${allDone&&!checked&&html`<button onClick=${check} style=${{padding:"8px 20px",background:"#166534",color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:600}}>Check Answers</button>`}
+    </div>
+  </div>`;
+}
+
+function MCActivity({act, onComplete}) {
+  const [answers, setAnswers] = useState([]);
+  const [checked, setChecked] = useState(false);
+  const [hint, setHint] = useState(false);
+  const allDone = answers.length===act.questions.length && answers.every(a=>a!=null);
+  const check = () => {
+    setChecked(true);
+    if(act.questions.every((q,i)=>answers[i]===q.ans)) setTimeout(()=>onComplete(true),600);
+  };
+  return html`<div>
+    ${hint&&html`<div style=${{padding:"10px 14px",background:"#fef9c3",borderRadius:8,fontSize:12,color:"#854d0e",marginBottom:12,borderLeft:"3px solid #eab308"}}>💡 ${act.hint}</div>`}
+    ${act.questions.map((q,qi)=>{
+      const ok=checked&&answers[qi]===q.ans, bad=checked&&answers[qi]!=null&&answers[qi]!==q.ans;
+      return html`<div key=${qi} style=${{marginBottom:14,padding:"14px",background:ok?"#f0fdf4":bad?"#fef2f2":"#fafaf9",borderRadius:10,borderLeft:ok?"3px solid #16a34a":bad?"3px solid #dc2626":"3px solid transparent"}}>
+        <p style=${{fontSize:13,fontWeight:600,color:"#1c1917",marginBottom:10}}>${qi+1}. ${q.q}</p>
+        <div style=${{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+          ${q.opts.map((opt,oi)=>{
+            const chosen=answers[qi]===oi;
+            const correct=checked&&oi===q.ans;
+            return html`<button key=${oi} onClick=${()=>{if(checked)return;const a=[...answers];a[qi]=oi;setAnswers(a);}}
+              style=${{padding:"9px 12px",border:correct?"2px solid #16a34a":chosen&&bad?"2px solid #dc2626":chosen?"2px solid #4338ca":"1.5px solid #ddd",borderRadius:8,background:correct?"#dcfce7":chosen&&bad?"#fee2e2":chosen?"#eef2ff":"#fff",textAlign:"left",fontSize:12,transition:"all .15s",cursor:checked?"default":"pointer"}}>
+              ${correct?"✅ ":chosen&&bad?"❌ ":""}${opt}
+            </button>`;
+          })}
+        </div>
+      </div>`;
+    })}
+    <div style=${{display:"flex",gap:8}}>
+      <button onClick=${()=>setHint(true)} style=${{padding:"8px 16px",background:"#fef9c3",border:"1px solid #eab308",borderRadius:8,fontSize:12,color:"#854d0e"}}>💡 Hint</button>
+      ${allDone&&!checked&&html`<button onClick=${check} style=${{padding:"8px 20px",background:"#166534",color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:600}}>Check Answers</button>`}
+    </div>
+  </div>`;
+}
+
+function FillActivity({act, onComplete}) {
+  const [vals, setVals] = useState(act.sentences.map(()=>""));
+  const [checked, setChecked] = useState(false);
+  const [hint, setHint] = useState(false);
+  const allDone = vals.every(v=>v.trim().length>0);
+  const check = () => {
+    setChecked(true);
+    if(act.sentences.every((s,i)=>vals[i].trim().toLowerCase()===s.ans.toLowerCase())) setTimeout(()=>onComplete(true),600);
+  };
+  return html`<div>
+    ${hint&&html`<div style=${{padding:"10px 14px",background:"#fef9c3",borderRadius:8,fontSize:12,color:"#854d0e",marginBottom:12,borderLeft:"3px solid #eab308"}}>💡 ${act.hint}</div>`}
+    <div style=${{padding:"10px 14px",background:"#f5f5f4",borderRadius:8,marginBottom:14}}>
+      <p style=${{fontSize:10,fontWeight:700,color:C.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:1}}>Word Bank</p>
+      <div style=${{display:"flex",flexWrap:"wrap",gap:5}}>
+        ${act.bank.map(w=>html`<span key=${w} style=${{padding:"3px 10px",background:"#fff",border:"1px solid #e7e5e0",borderRadius:14,fontSize:12,color:"#44403c",fontWeight:500}}>${w}</span>`)}
+      </div>
+    </div>
+    ${act.sentences.map((s,i)=>{
+      const ok=checked&&vals[i].trim().toLowerCase()===s.ans.toLowerCase();
+      const bad=checked&&vals[i].trim().toLowerCase()!==s.ans.toLowerCase();
+      return html`<div key=${i} style=${{marginBottom:10}}>
+        <p style=${{fontSize:13,color:"#333",marginBottom:4}}>${s.text.replace("______","________")}</p>
+        <input value=${vals[i]} onChange=${e=>{if(checked)return;const v=[...vals];v[i]=e.target.value;setVals(v);}}
+          placeholder="..." style=${{width:"100%",maxWidth:220,padding:"8px 12px",border:ok?"2px solid #16a34a":bad?"2px solid #dc2626":"1.5px solid #ddd",borderRadius:8,fontSize:13,outline:"none",background:ok?"#dcfce7":bad?"#fee2e2":"#fff"}}/>
+        ${bad&&html`<p style=${{fontSize:10,color:"#dc2626",marginTop:2}}>Correct: ${s.ans}</p>`}
+      </div>`;
+    })}
+    <div style=${{display:"flex",gap:8,marginTop:10}}>
+      <button onClick=${()=>setHint(true)} style=${{padding:"8px 16px",background:"#fef9c3",border:"1px solid #eab308",borderRadius:8,fontSize:12,color:"#854d0e"}}>💡 Hint</button>
+      ${allDone&&!checked&&html`<button onClick=${check} style=${{padding:"8px 20px",background:"#166534",color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:600}}>Check Answers</button>`}
+    </div>
+  </div>`;
+}
+
+function SortActivity({act, onComplete}) {
+  const [choices, setChoices] = useState({});
+  const [checked, setChecked] = useState(false);
+  const [hint, setHint] = useState(false);
+  const allDone = Object.keys(choices).length===act.items.length;
+  const check = () => {
+    setChecked(true);
+    if(act.items.every(item=>choices[item.text]===item.ans)) setTimeout(()=>onComplete(true),600);
+  };
+  return html`<div>
+    ${hint&&html`<div style=${{padding:"10px 14px",background:"#fef9c3",borderRadius:8,fontSize:12,color:"#854d0e",marginBottom:12,borderLeft:"3px solid #eab308"}}>💡 ${act.hint}</div>`}
+    <div style=${{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+      ${act.items.map(item=>{
+        const ok=checked&&choices[item.text]===item.ans, bad=checked&&choices[item.text]&&choices[item.text]!==item.ans;
+        return html`<div key=${item.text} style=${{display:"flex",alignItems:"center",gap:6,padding:"8px 10px",background:ok?"#dcfce7":bad?"#fee2e2":"#fff",border:"1.5px solid #ddd",borderRadius:8}}>
+          <span style=${{flex:1,fontSize:12}}>${ok?"✅ ":bad?"❌ ":""} ${item.text}</span>
+          <button onClick=${()=>!checked&&setChoices(p=>({...p,[item.text]:"Soft"}))}
+            style=${{padding:"4px 8px",fontSize:10,border:choices[item.text]==="Soft"?"2px solid #b45309":"1px solid #ccc",borderRadius:5,background:choices[item.text]==="Soft"?"#fef3c7":"#fff",fontWeight:choices[item.text]==="Soft"?700:400,cursor:checked?"default":"pointer"}}>Soft</button>
+          <button onClick=${()=>!checked&&setChoices(p=>({...p,[item.text]:"Hard"}))}
+            style=${{padding:"4px 8px",fontSize:10,border:choices[item.text]==="Hard"?"2px solid #4338ca":"1px solid #ccc",borderRadius:5,background:choices[item.text]==="Hard"?"#e0e7ff":"#fff",fontWeight:choices[item.text]==="Hard"?700:400,cursor:checked?"default":"pointer"}}>Hard</button>
+        </div>`;
+      })}
+    </div>
+    <div style=${{display:"flex",gap:8,marginTop:12}}>
+      <button onClick=${()=>setHint(true)} style=${{padding:"8px 16px",background:"#fef9c3",border:"1px solid #eab308",borderRadius:8,fontSize:12,color:"#854d0e"}}>💡 Hint</button>
+      ${allDone&&!checked&&html`<button onClick=${check} style=${{padding:"8px 20px",background:"#166534",color:"#fff",border:"none",borderRadius:8,fontSize:13,fontWeight:600}}>Check Answers</button>`}
+    </div>
+  </div>`;
+}
+
+// ─── Tab components ───────────────────────────────────────
+function LearnTab({themeIdx, onNext}) {
+  const theme = C.themes[themeIdx];
+  const items = LEARN[themeIdx];
+  return html`<div class="fade-in">
+    ${items.map((item,i)=>html`<div key=${i} style=${{marginBottom:20}}>
+      ${item.type==="intro"&&html`<div style=${{padding:"24px 20px",background:theme.glow,borderRadius:14,borderLeft:`4px solid ${theme.primary}`}}>
+        <h2 style=${{fontSize:20,fontWeight:700,color:theme.primary,marginBottom:8,fontFamily:C.font}}>${item.title}</h2>
+        <p style=${{fontSize:14,color:"#44403c",lineHeight:1.8,fontFamily:C.font}}>${item.text}</p>
+      </div>`}
+      ${item.type==="pyramid"&&html`<div style=${{background:"#fff",borderRadius:14,padding:"20px 16px 12px",border:`1px solid ${C.border}`,textAlign:"center"}}>
+        <${FoodPyramid}/>
+        <p style=${{fontSize:11,color:C.muted,marginTop:8,fontStyle:"italic"}}>The Food Pyramid — eat more from the bottom, less from the top</p>
+      </div>`}
+      ${item.type==="brainImg"&&html`<div style=${{background:"#fff",borderRadius:14,padding:"16px",border:`1px solid ${C.border}`,textAlign:"center"}}>
+        <img src="./img-brain.jpg" alt="Human brain anatomy" style=${{width:"100%",maxWidth:640,borderRadius:10}}/>
+        <p style=${{fontSize:11,color:C.muted,marginTop:8,fontStyle:"italic"}}>Human brain anatomy with labeled regions</p>
+      </div>`}
+      ${item.type==="neuronImg"&&html`<div style=${{background:"#fff",borderRadius:14,padding:"16px",border:`1px solid ${C.border}`,textAlign:"center"}}>
+        <img src="./img-neuron.jpg" alt="Neuron diagram" style=${{width:"100%",maxWidth:640,borderRadius:10}}/>
+        <p style=${{fontSize:11,color:C.muted,marginTop:8,fontStyle:"italic"}}>Complete neuron cell diagram with all components labeled</p>
+      </div>`}
+      ${item.type==="skillsWheel"&&html`<div style=${{background:"#fff",borderRadius:14,padding:"20px 16px 12px",border:`1px solid ${C.border}`,textAlign:"center"}}>
+        <${SkillsWheel}/>
+        <p style=${{fontSize:11,color:C.muted,marginTop:8,fontStyle:"italic"}}>The 8 Core Soft Skills — each one is essential</p>
+      </div>`}
+      ${item.type==="cards"&&html`<div>
+        <h3 style=${{fontSize:15,fontWeight:700,color:C.dark,marginBottom:10,fontFamily:C.font}}>${item.title}</h3>
+        <div style=${{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          ${item.items.map((card,ci)=>html`<div key=${ci} style=${{background:"#fff",borderRadius:12,padding:"16px 14px",border:`1px solid ${C.border}`,borderTop:`3px solid ${card.color}`}}>
+            <div style=${{fontSize:22,marginBottom:6}}>${card.emoji}</div>
+            <h4 style=${{fontSize:13,fontWeight:700,color:card.color,marginBottom:4}}>${card.title}</h4>
+            <p style=${{fontSize:11,color:"#57534e",lineHeight:1.6}}>${card.desc}</p>
+          </div>`)}
+        </div>
+      </div>`}
+      ${item.type==="alert"&&html`<div style=${{padding:"16px 18px",background:"#fef2f2",borderRadius:12,borderLeft:"4px solid #dc2626"}}>
+        <h3 style=${{fontSize:14,fontWeight:700,color:"#dc2626",marginBottom:4}}>${item.title}</h3>
+        <p style=${{fontSize:12,color:"#7f1d1d",lineHeight:1.6}}>${item.text}</p>
+      </div>`}
+      ${item.type==="info"&&html`<div style=${{padding:"16px 18px",background:"#eff6ff",borderRadius:12,borderLeft:"4px solid #3b82f6"}}>
+        <h3 style=${{fontSize:13,fontWeight:700,color:"#1d4ed8",marginBottom:6}}>${item.title}</h3>
+        <p style=${{fontSize:12,color:"#1e3a5f",lineHeight:1.7}}>${item.text}</p>
+      </div>`}
+    </div>`)}
+    <button onClick=${onNext} style=${{width:"100%",padding:"14px 0",background:theme.primary,color:"#fff",border:"none",borderRadius:10,fontSize:14,fontWeight:700,marginTop:8}}>
+      I've studied this → Go to Practice 🎯
+    </button>
+  </div>`;
+}
+
+function PracticeTab({themeIdx, completed, onComplete, onPrev, onNext}) {
+  const theme = C.themes[themeIdx];
+  const acts = PRACTICE[themeIdx];
+  const ComponentMap={matching:MatchingActivity,mc:MCActivity,fill:FillActivity,sort:SortActivity};
+  return html`<div class="fade-in">
+    <div style=${{padding:"16px 18px",background:"#eef2ff",borderRadius:12,marginBottom:16,borderLeft:"4px solid #4338ca"}}>
+      <h3 style=${{fontSize:14,fontWeight:700,color:"#4338ca",marginBottom:4}}>🎯 Practice Mode</h3>
+      <p style=${{fontSize:12,color:"#312e81",lineHeight:1.6}}>These activities have hints and instant feedback. Use them to check your understanding before the final workshop. You can retry as many times as you need!</p>
+    </div>
+    ${acts.map(act=>{
+      const Comp=ComponentMap[act.type];
+      return html`<div key=${act.id} style=${{background:"#fff",borderRadius:12,padding:20,marginBottom:14,border:completed[act.id]?"2px solid #16a34a":`1px solid ${C.border}`,position:"relative"}}>
+        ${completed[act.id]&&html`<div style=${{position:"absolute",top:10,right:14,background:"#dcfce7",color:"#166534",padding:"3px 10px",borderRadius:10,fontSize:10,fontWeight:700}}>✅ Completed</div>`}
+        <h4 style=${{fontSize:14,fontWeight:700,color:"#1c1917",marginBottom:12}}>${act.icon} ${act.label}</h4>
+        <${Comp} act=${act} onComplete=${()=>onComplete(act.id)}/>
+      </div>`;
+    })}
+    <div style=${{display:"flex",gap:8}}>
+      <button onClick=${onPrev} style=${{flex:1,padding:"12px 0",background:"#fff",border:`1.5px solid ${C.border}`,borderRadius:10,fontSize:13,color:C.muted}}>← Back to Learn</button>
+      <button onClick=${onNext} style=${{flex:1,padding:"12px 0",background:"#b45309",color:"#fff",border:"none",borderRadius:10,fontSize:13,fontWeight:700}}>Biblical Connection ✝️ →</button>
+    </div>
+  </div>`;
+}
+
+function BiblicalTab({themeIdx, onPrev, onNext}) {
+  const theme = C.themes[themeIdx];
+  const b = BIBLICAL[themeIdx];
+  return html`<div class="fade-in">
+    <div style=${{background:"linear-gradient(135deg,#1c1917 0%,#292524 100%)",borderRadius:16,padding:"28px 22px",marginBottom:20,color:"#fafaf9"}}>
+      <div style=${{fontSize:11,fontWeight:700,color:"#d97706",textTransform:"uppercase",letterSpacing:2,marginBottom:10}}>${b.verse}</div>
+      <p style=${{fontSize:16,fontStyle:"italic",lineHeight:1.8,color:"#e7e5e4",fontFamily:C.font}}>"${b.text}"</p>
+    </div>
+    <div style=${{background:"#fff",borderRadius:12,padding:20,marginBottom:14,border:`1px solid ${C.border}`}}>
+      <h4 style=${{fontSize:13,fontWeight:700,color:"#b45309",marginBottom:8}}>📖 Historical Context</h4>
+      <p style=${{fontSize:13,color:"#44403c",lineHeight:1.7}}>${b.context}</p>
+    </div>
+    <div style=${{background:theme.glow,borderRadius:12,padding:20,marginBottom:14,borderLeft:`4px solid ${theme.primary}`}}>
+      <h4 style=${{fontSize:13,fontWeight:700,color:theme.primary,marginBottom:8}}>🔗 Connection to ${theme.name}</h4>
+      <p style=${{fontSize:13,color:"#44403c",lineHeight:1.7}}>${b.connection}</p>
+    </div>
+    <div style=${{background:"#fef9c3",borderRadius:12,padding:20,marginBottom:14,borderLeft:"4px solid #eab308"}}>
+      <h4 style=${{fontSize:13,fontWeight:700,color:"#854d0e",marginBottom:8}}>💡 Example Reflection — How to Write Yours</h4>
+      <p style=${{fontSize:12,color:"#713f12",lineHeight:1.7,fontStyle:"italic",fontFamily:C.font}}>"${b.exampleReflection}"</p>
+      <div style=${{marginTop:12,padding:"10px 14px",background:"rgba(255,255,255,0.6)",borderRadius:8}}>
+        <p style=${{fontSize:11,fontWeight:700,color:"#854d0e",marginBottom:4}}>✅ Notice how this reflection:</p>
+        <p style=${{fontSize:11,color:"#92400e",lineHeight:1.6}}>• States what the verse means in their own words{"\n"}• Connects it specifically to the Science topic{"\n"}• Gives a personal application (what they will do){"\n"}• Mentions others (not just about themselves){"\n"}• Uses 4–6 complete sentences</p>
+      </div>
+    </div>
+    <div style=${{background:"#fff",borderRadius:12,padding:20,marginBottom:14,border:`1px solid ${C.border}`}}>
+      <h4 style=${{fontSize:13,fontWeight:700,color:"#dc2626",marginBottom:8}}>🖊️ Your Practice Reflection</h4>
+      <p style=${{fontSize:12,color:"#666",marginBottom:10}}>${b.prompt}</p>
+      <textarea rows="5" placeholder="Practice writing your reflection here... This won't be graded — it's for practice!" style=${{width:"100%",padding:14,border:`1.5px solid ${C.border}`,borderRadius:10,fontSize:13,lineHeight:1.7,outline:"none",fontFamily:C.font,boxSizing:"border-box"}}/>
+      <p style=${{fontSize:10,color:C.muted,marginTop:4,fontStyle:"italic"}}>This is practice only. Your graded reflection will be in the Final Workshop.</p>
+    </div>
+    <div style=${{display:"flex",gap:8}}>
+      <button onClick=${onPrev} style=${{flex:1,padding:"12px 0",background:"#fff",border:`1.5px solid ${C.border}`,borderRadius:10,fontSize:13,color:C.muted}}>← Practice</button>
+      <button onClick=${onNext} style=${{flex:1,padding:"12px 0",background:"#dc2626",color:"#fff",border:"none",borderRadius:10,fontSize:13,fontWeight:700}}>Final Workshop 📝 →</button>
+    </div>
+  </div>`;
+}
+
+function WorkshopTab({name, grade, answers, setAnswers, onSubmit, submitting}) {
+  const totalPts = WORKSHOP.flat().reduce((s,q)=>s+q.pts,0);
+  return html`<div class="fade-in">
+    <div style=${{padding:"16px 18px",background:"#fef2f2",borderRadius:12,marginBottom:16,borderLeft:"4px solid #dc2626"}}>
+      <h3 style=${{fontSize:14,fontWeight:700,color:"#dc2626",marginBottom:4}}>📝 Final Workshop — Graded Assessment</h3>
+      <p style=${{fontSize:12,color:"#7f1d1d",lineHeight:1.6}}>This is your final evaluation. Answer all questions carefully. When you submit, a PDF with your score will be generated and sent to Prof. Ortiz.</p>
+      <p style=${{fontSize:11,color:"#991b1b",fontWeight:600,marginTop:6}}>Total: ${totalPts} points across all 3 themes</p>
+    </div>
+    ${WORKSHOP.map((qs,ti)=>{
+      const theme=C.themes[ti];
+      return html`<div key=${ti} style=${{marginBottom:24}}>
+        <div style=${{padding:"12px 16px",background:theme.light,borderRadius:10,marginBottom:12,borderLeft:`4px solid ${theme.primary}`}}>
+          <h4 style=${{fontSize:13,fontWeight:700,color:theme.primary}}>${theme.icon} ${theme.name} — ${BIBLICAL[ti].verse}</h4>
+        </div>
+        ${qs.map(q=>html`<div key=${q.id} style=${{background:"#fff",borderRadius:12,padding:"18px 16px",marginBottom:10,border:`1px solid ${C.border}`}}>
+          <div style=${{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+            <p style=${{fontSize:13,fontWeight:600,color:"#1c1917",flex:1}}>${q.q}</p>
+            <span style=${{fontSize:10,color:C.muted,whiteSpace:"nowrap",marginLeft:8}}>${q.pts} pts</span>
+          </div>
+          ${q.type==="mc"&&html`<div style=${{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+            ${q.opts.map((opt,oi)=>html`<button key=${oi} onClick=${()=>setAnswers(p=>({...p,[q.id]:oi}))}
+              style=${{padding:"10px 12px",border:answers[q.id]===oi?`2px solid ${theme.primary}`:`1.5px solid ${C.border}`,borderRadius:8,background:answers[q.id]===oi?theme.light:"#fff",textAlign:"left",fontSize:12,transition:"all .15s"}}>
+              ${opt}
+            </button>`)}
+          </div>`}
+          ${q.type==="fill"&&html`<input value=${answers[q.id]||""} onChange=${e=>setAnswers(p=>({...p,[q.id]:e.target.value}))}
+            placeholder="Type your answer..." style=${{width:"100%",padding:"10px 14px",border:`1.5px solid ${C.border}`,borderRadius:8,fontSize:13,outline:"none",boxSizing:"border-box"}}/>`}
+          ${q.type==="open"&&html`<textarea value=${answers[q.id]||""} onChange=${e=>setAnswers(p=>({...p,[q.id]:e.target.value}))}
+            rows="5" placeholder="Write your reflection here (4–6 sentences)..."
+            style=${{width:"100%",padding:14,border:`1.5px solid ${C.border}`,borderRadius:10,fontSize:13,lineHeight:1.7,outline:"none",fontFamily:C.font,boxSizing:"border-box"}}/>`}
+        </div>`)}
+      </div>`;
+    })}
+    <button onClick=${onSubmit} disabled=${submitting}
+      style=${{width:"100%",padding:"16px 0",background:submitting?"#9ca3af":"#dc2626",color:"#fff",border:"none",borderRadius:12,fontSize:16,fontWeight:700,boxShadow:"0 4px 12px rgba(220,38,38,.3)",transition:"all .2s"}}>
+      ${submitting?"⏳ Generating PDF...":"🚀 Submit Workshop & Generate PDF"}
+    </button>
+  </div>`;
+}
+
+function ResultsScreen({name, grade, pdfBlob, scores, onRetry, telegramStatus}) {
+  const total=scores.reduce((a,b)=>a+b,0);
+  const pct=Math.round(total/TOTAL_PTS*100);
+
+  const download = () => {
+    // Cross-platform PDF download
+    const { jsPDF } = window.jspdf;
+    const filename = `Science_Workshop_${name.replace(/\s+/g,"_")}.pdf`;
+    // Use jsPDF's built-in save which handles iOS, Android, Windows
+    const url = URL.createObjectURL(pdfBlob);
+    const isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    if(isIOS) {
+      // iOS: open in new tab (user can then share/save from browser)
+      window.open(url, "_blank");
+    } else {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    }
+  };
+
+  return html`<div class="fade-in" style=${{textAlign:"center",padding:"40px 20px"}}>
+    <div style=${{fontSize:56,marginBottom:12}}>🎉</div>
+    <h2 style=${{fontSize:22,fontWeight:700,color:"#1c1917",marginBottom:8,fontFamily:C.font}}>Workshop Submitted!</h2>
+    <p style=${{fontSize:14,color:C.muted,marginBottom:8}}>${name} — ${grade}</p>
+    <div style=${{display:"inline-block",padding:"16px 32px",background:pct>=75?"#f0fdf4":"#fef9c3",borderRadius:12,marginBottom:20,border:`2px solid ${pct>=75?"#16a34a":"#eab308"}`}}>
+      <p style=${{fontSize:28,fontWeight:700,color:pct>=75?"#166534":"#854d0e"}}>${total} / ${TOTAL_PTS}</p>
+      <p style=${{fontSize:16,color:pct>=75?"#166534":"#854d0e"}}>${pct}% — ${pct>=90?"Outstanding!":pct>=75?"Great work!":pct>=60?"Good effort!":"Keep studying!"}</p>
+    </div>
+    ${pdfBlob&&html`<div style=${{marginBottom:16}}>
+      <button onClick=${download}
+        style=${{display:"block",width:"100%",padding:"16px 40px",background:"#166534",color:"#fff",borderRadius:12,fontSize:16,fontWeight:700,border:"none",boxShadow:"0 4px 12px rgba(22,101,52,.3)",marginBottom:8}}>
+        ⬇ Download Your Graded PDF
+      </button>
+      <p style=${{fontSize:11,color:C.muted}}>
+        ${/ipad|iphone|ipod/i.test(navigator.userAgent)?"The PDF will open in your browser. Tap Share → Save to Files to keep it.":"Your PDF is ready to download."}
+      </p>
+    </div>`}
+    ${telegramStatus==="sending"&&html`<div style=${{padding:"10px 16px",background:"#eff6ff",borderRadius:10,marginBottom:12,fontSize:13,color:"#1d4ed8"}}>
+      📤 Sending PDF to Prof. Ortiz via Telegram...
+    </div>`}
+    ${telegramStatus==="sent"&&html`<div style=${{padding:"10px 16px",background:"#f0fdf4",borderRadius:10,marginBottom:12,fontSize:13,color:"#166534"}}>
+      ✅ PDF sent to Prof. Ortiz via Telegram!
+    </div>`}
+    ${telegramStatus==="failed"&&html`<div style=${{padding:"10px 16px",background:"#fef9c3",borderRadius:10,marginBottom:12,fontSize:13,color:"#854d0e"}}>
+      ⚠️ Could not send via Telegram. Please download and send manually.
+    </div>`}
+    ${telegramStatus==="not_configured"&&html`<div style=${{padding:"10px 16px",background:"#f5f5f4",borderRadius:10,marginBottom:12,fontSize:12,color:C.muted}}>
+      Download the PDF and send a copy to Prof. Ortiz.
+    </div>`}
+    <button onClick=${onRetry} style=${{marginTop:8,padding:"10px 24px",background:"#fff",border:`1.5px solid ${C.border}`,borderRadius:8,fontSize:13,color:C.muted}}>← Try Again</button>
+  </div>`;
+}
+
+// ─── Main App ─────────────────────────────────────────────
+function App() {
+  const [screen, setScreen] = useState("welcome");
+  const [name, setName] = useState("");
+  const [grade, setGrade] = useState("8th Grade — Azul");
+  const [themeIdx, setThemeIdx] = useState(0);
+  const [tabIdx, setTabIdx] = useState(0);
+  const [practiceCompleted, setPracticeCompleted] = useState({});
+  const [workshopAnswers, setWorkshopAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [pdfBlob, setPdfBlob] = useState(null);
+  const [scores, setScores] = useState([0,0,0]);
+  const [telegramStatus, setTelegramStatus] = useState("not_configured");
+  const scrollRef = useRef(null);
+
+  // Scroll to top on tab change
+  useEffect(()=>{
+    if(scrollRef.current) scrollRef.current.scrollTop=0;
+  },[themeIdx,tabIdx]);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    const themeScores = WORKSHOP.map((qs,ti)=>scoreTheme(qs,workshopAnswers));
+    setScores(themeScores);
+    try {
+      const doc = generatePDF(name, grade, workshopAnswers, themeScores);
+      const blob = doc.output("blob");
+      setPdfBlob(blob);
+
+      // Send to Telegram
+      if(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+        setTelegramStatus("sending");
+        const result = await sendToTelegram(blob, name, grade);
+        setTelegramStatus(result.ok ? "sent" : "failed");
+      } else {
+        setTelegramStatus("not_configured");
+      }
+
+      setSubmitted(true);
+    } catch(e) {
+      console.error("PDF generation error:", e);
+      alert("Error generating PDF. Please try again.");
+    }
+    setSubmitting(false);
+  };
+
+  if(screen==="welcome") return html`
+    <div style=${{minHeight:"100vh",background:"#1c1917",display:"flex",alignItems:"center",justifyContent:"center",padding:20,fontFamily:C.sans}}>
+      <div style=${{maxWidth:420,width:"100%",textAlign:"center"}}>
+        <div style=${{fontSize:56,marginBottom:12}}>🔬</div>
+        <h1 style=${{color:"#fafaf9",fontSize:28,fontWeight:700,marginBottom:4,fontFamily:C.font}}>8th Grade Science</h1>
+        <p style=${{color:"#a8a29e",fontSize:14,marginBottom:6}}>Complete Learning Experience — 1st Term 2026</p>
+        <p style=${{color:"#78716c",fontSize:11,marginBottom:32,fontStyle:"italic"}}>Learn · Practice · Reflect · Be Evaluated</p>
+        <div style=${{background:"rgba(255,255,255,.04)",borderRadius:16,padding:"28px 24px",border:"1px solid rgba(255,255,255,.08)"}}>
+          <input value=${name} onChange=${e=>setName(e.target.value)} placeholder="Your full name"
+            style=${{width:"100%",padding:"14px 16px",border:"1.5px solid rgba(255,255,255,.1)",borderRadius:10,fontSize:15,background:"rgba(255,255,255,.04)",color:"#fafaf9",outline:"none",marginBottom:12,boxSizing:"border-box",fontFamily:C.sans}}/>
+          <select value=${grade} onChange=${e=>setGrade(e.target.value)}
+            style=${{width:"100%",padding:"14px 16px",border:"1.5px solid rgba(255,255,255,.1)",borderRadius:10,fontSize:14,background:"rgba(0,0,0,.3)",color:"#fafaf9",outline:"none",marginBottom:16,boxSizing:"border-box",fontFamily:C.sans}}>
+            <option value="8th Grade — Azul">8th Grade — Azul</option>
+            <option value="8th Grade — Rojo">8th Grade — Rojo</option>
+          </select>
+          <button onClick=${()=>{if(!name.trim())return alert("Enter your name!");setScreen("app");}}
+            style=${{width:"100%",padding:"14px 0",background:"#166534",color:"#fff",border:"none",borderRadius:10,fontSize:15,fontWeight:700,letterSpacing:.5}}>
+            Begin →
+          </button>
+        </div>
+        <p style=${{color:"#57534e",fontSize:10,marginTop:24}}>Colegio Boston Flexible · ClassroomsOS</p>
+      </div>
+    </div>`;
+
+  const themeObj = C.themes[themeIdx];
+  const tabs = [
+    {label:"📖 Learn",color:"#166534"},
+    {label:"🎯 Practice",color:"#4338ca"},
+    {label:"✝️ Biblical",color:"#b45309"},
+    {label:"📝 Workshop",color:"#dc2626"},
+  ];
+
+  return html`<div style=${{minHeight:"100vh",background:"#f9fafb",fontFamily:C.sans}}>
+    <!-- Hidden image for PDF -->
+    <img id="img-brain-pdf" src="./img-brain-pdf.jpg" style=${{display:"none"}} alt=""/>
+
+    <!-- Top nav -->
+    <div style=${{background:"#1c1917",padding:"12px 16px",color:"#fafaf9",position:"sticky",top:0,zIndex:100}}>
+      <div style=${{maxWidth:800,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <span style=${{fontSize:14,fontWeight:700}}>🔬 Science 8th</span>
+          <span style=${{fontSize:11,color:"#a8a29e",marginLeft:8}}>${name}</span>
+        </div>
+        <span style=${{fontSize:11,color:"#78716c"}}>${grade}</span>
+      </div>
+    </div>
+
+    <!-- Theme tabs -->
+    <div style=${{background:"#fff",borderBottom:`1px solid ${C.border}`,overflowX:"auto"}}>
+      <div style=${{display:"flex",maxWidth:800,margin:"0 auto"}}>
+        ${C.themes.slice(0,3).map((t,i)=>html`<button key=${i} onClick=${()=>{setThemeIdx(i);setTabIdx(0);setSubmitted(false);}}
+          style=${{padding:"12px 14px",border:"none",borderBottom:themeIdx===i?`3px solid ${t.primary}`:"3px solid transparent",background:"transparent",fontSize:12,fontWeight:themeIdx===i?700:400,color:themeIdx===i?t.primary:C.muted,whiteSpace:"nowrap"}}>
+          ${t.icon} ${t.name}
+        </button>`)}
+      </div>
+    </div>
+
+    <!-- Sub-tabs -->
+    <div style=${{background:themeObj.light,padding:"8px 16px",borderBottom:`1px solid ${C.border}`,overflowX:"auto"}}>
+      <div style=${{display:"flex",gap:6,maxWidth:800,margin:"0 auto"}}>
+        ${tabs.map((t,i)=>html`<button key=${i} onClick=${()=>setTabIdx(i)}
+          style=${{padding:"7px 14px",border:tabIdx===i?`2px solid ${t.color}`:`1.5px solid ${C.border}`,borderRadius:20,background:tabIdx===i?"#fff":"transparent",fontSize:11,fontWeight:tabIdx===i?700:400,color:tabIdx===i?t.color:C.muted,whiteSpace:"nowrap"}}>
+          ${t.label}
+        </button>`)}
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div ref=${scrollRef} style=${{maxWidth:800,margin:"0 auto",padding:"16px 16px 60px"}}>
+      ${tabIdx===0&&html`<${LearnTab} themeIdx=${themeIdx} onNext=${()=>setTabIdx(1)}/>`}
+      ${tabIdx===1&&html`<${PracticeTab} themeIdx=${themeIdx} completed=${practiceCompleted}
+        onComplete=${id=>setPracticeCompleted(p=>({...p,[id]:true}))}
+        onPrev=${()=>setTabIdx(0)} onNext=${()=>setTabIdx(2)}/>`}
+      ${tabIdx===2&&html`<${BiblicalTab} themeIdx=${themeIdx} onPrev=${()=>setTabIdx(1)} onNext=${()=>setTabIdx(3)}/>`}
+      ${tabIdx===3&&!submitted&&html`<${WorkshopTab} name=${name} grade=${grade}
+        answers=${workshopAnswers} setAnswers=${setWorkshopAnswers}
+        onSubmit=${handleSubmit} submitting=${submitting}/>`}
+      ${tabIdx===3&&submitted&&html`<${ResultsScreen} name=${name} grade=${grade}
+        pdfBlob=${pdfBlob} scores=${scores} telegramStatus=${telegramStatus}
+        onRetry=${()=>{setSubmitted(false);setWorkshopAnswers({});setPdfBlob(null);setScores([0,0,0]);setTelegramStatus("not_configured");}}/>`}
+    </div>
+  </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+</script>
+</body>
 </html>
