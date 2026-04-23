@@ -341,12 +341,19 @@ async function sendToTelegram(blob, studentName, grade) {
 }
 
 // ─── PDF Generator ────────────────────────────────────────
+// Strip characters outside Latin-1 (unsupported by standard PDF fonts)
+const pdfSafe = (str) => String(str || "").replace(/[^\x00-\xFF]/g, "");
+
 function generatePDF(name, grade, answers, scores) {
+  if(!window.jspdf) throw new Error("jsPDF not loaded. Check internet connection.");
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:"pt", format:"a4"});
   const W=595, M=40, CW=W-2*M;
   let y=M;
   const nl=(h)=>{ if(y+h>800){doc.addPage();y=M;} };
+  // Safe text helper — strips unsupported Unicode before rendering
+  const t = (str, x, yPos, opts) => doc.text(pdfSafe(str), x, yPos, opts||{});
+  const split = (str, w) => doc.splitTextToSize(pdfSafe(str), w);
 
   // Cover page
   doc.setFillColor(28,25,23);
@@ -356,28 +363,28 @@ function generatePDF(name, grade, answers, scores) {
   doc.setTextColor(255,255,255);
   doc.setFont("helvetica","bold");
   doc.setFontSize(34);
-  doc.text("8th Grade Science",W/2,180,{align:"center"});
+  t("8th Grade Science",W/2,180,{align:"center"});
   doc.setFontSize(16);
   doc.setFont("helvetica","normal");
-  doc.text("Final Workshop — 1st Term 2026",W/2,218,{align:"center"});
+  t("Final Workshop - 1st Term 2026",W/2,218,{align:"center"});
   doc.setFontSize(14);
-  doc.text(`Student: ${name}`,W/2,400,{align:"center"});
-  doc.text(`Grade: ${grade}`,W/2,424,{align:"center"});
-  doc.text(`Date: ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}`,W/2,448,{align:"center"});
+  t(`Student: ${name}`,W/2,400,{align:"center"});
+  t(`Grade: ${grade}`,W/2,424,{align:"center"});
+  t(`Date: ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}`,W/2,448,{align:"center"});
   const total = scores.reduce((a,b)=>a+b,0);
   const pct = Math.round(total/TOTAL_PTS*100);
   doc.setFontSize(26);
   doc.setFont("helvetica","bold");
   doc.setTextColor(34,197,94);
-  doc.text(`Score: ${total} / ${TOTAL_PTS}`,W/2,520,{align:"center"});
+  t(`Score: ${total} / ${TOTAL_PTS}`,W/2,520,{align:"center"});
   doc.setFontSize(13);
   doc.setFont("helvetica","normal");
   doc.setTextColor(180,180,180);
-  doc.text(`${pct}% — ${pct>=90?"Outstanding!":pct>=75?"Great work!":pct>=60?"Good effort!":"Keep studying!"}`,W/2,548,{align:"center"});
+  t(`${pct}% - ${pct>=90?"Outstanding!":pct>=75?"Great work!":pct>=60?"Good effort!":"Keep studying!"}`,W/2,548,{align:"center"});
   doc.setFontSize(10);
   doc.setTextColor(120,120,120);
-  doc.text("Colegio Boston Flexible — ClassroomsOS",W/2,778,{align:"center"});
-  doc.text('"Year of Purity" — Genesis 1:27-28a TLA',W/2,796,{align:"center"});
+  t("Colegio Boston Flexible - ClassroomsOS",W/2,778,{align:"center"});
+  t('"Year of Purity" - Genesis 1:27-28a TLA',W/2,796,{align:"center"});
 
   const themeColors=[[22,101,52],[67,56,202],[180,83,9]];
   const themeNames=["THEME 1: Healthy Diet & Nutrition","THEME 2: Central Nervous System","THEME 3: Soft Skills for Life"];
@@ -390,19 +397,22 @@ function generatePDF(name, grade, answers, scores) {
     doc.setTextColor(255,255,255);
     doc.setFontSize(16);
     doc.setFont("helvetica","bold");
-    doc.text(themeNames[ti],W/2,28,{align:"center"});
+    t(themeNames[ti],W/2,28,{align:"center"});
     doc.setFontSize(10);
     doc.setFont("helvetica","normal");
-    doc.text(`Biblical Principle: ${themeVerses[ti]}`,W/2,46,{align:"center"});
-    doc.text(`Score: ${scores[ti]} points`,W/2,62,{align:"center"});
+    t(`Biblical Principle: ${themeVerses[ti]}`,W/2,46,{align:"center"});
+    t(`Score: ${scores[ti]} points`,W/2,62,{align:"center"});
     y=90;
 
-    // Add brain image for theme 1
+    // Brain image for theme 1 (fully optional — skipped if unavailable)
     if(ti===1) {
       try {
         const imgEl = document.getElementById("img-brain-pdf");
-        if(imgEl) { doc.addImage(imgEl,"JPEG",M+60,y,CW-120,160); y+=175; }
-      } catch(e){}
+        if(imgEl && imgEl.complete && imgEl.naturalWidth>0) {
+          doc.addImage(imgEl,"JPEG",M+60,y,CW-120,160);
+          y+=175;
+        }
+      } catch(e){ /* skip image silently */ }
     }
 
     qs.forEach(q => {
@@ -410,8 +420,7 @@ function generatePDF(name, grade, answers, scores) {
       doc.setFontSize(11);
       doc.setFont("helvetica","bold");
       doc.setTextColor(28,25,23);
-      const icon = q.type==="open"?"📝":q.type==="fill"?"✏️":"📋";
-      doc.splitTextToSize(`${q.q}`,CW-10).forEach(line=>{nl(16);doc.text(line,M+5,y+12);y+=15;});
+      split(q.q, CW-10).forEach(line=>{nl(16);t(line,M+5,y+12);y+=15;});
       doc.setFont("helvetica","normal");
       doc.setFontSize(10);
       y+=4;
@@ -421,20 +430,20 @@ function generatePDF(name, grade, answers, scores) {
         const correct=q.opts[q.ans];
         const ok=ans===q.ans;
         doc.setTextColor(ok?22:200,ok?101:50,ok?52:50);
-        doc.text(`${ok?"✓":"✗"} Your answer: ${chosen}`,M+10,y+10);y+=16;
-        if(!ok){doc.setTextColor(22,101,52);doc.text(`  Correct: ${correct}`,M+10,y+10);y+=16;}
+        t(`${ok?"[CORRECT]":"[WRONG]"} Your answer: ${chosen}`,M+10,y+10);y+=16;
+        if(!ok){doc.setTextColor(22,101,52);t(`  Correct answer: ${correct}`,M+10,y+10);y+=16;}
       } else if(q.type==="fill"){
         const ok=(ans||"").trim().toLowerCase()===q.ans.toLowerCase();
         doc.setTextColor(ok?22:200,ok?101:50,ok?52:50);
-        doc.text(`${ok?"✓":"✗"} Your answer: ${ans||"(blank)"}`,M+10,y+10);y+=16;
-        if(!ok){doc.setTextColor(22,101,52);doc.text(`  Correct: ${q.ans}`,M+10,y+10);y+=16;}
+        t(`${ok?"[CORRECT]":"[WRONG]"} Your answer: ${ans||"(blank)"}`,M+10,y+10);y+=16;
+        if(!ok){doc.setTextColor(22,101,52);t(`  Correct answer: ${q.ans}`,M+10,y+10);y+=16;}
       } else {
         doc.setTextColor(50,50,50);
-        doc.splitTextToSize(ans||"(not answered)",CW-20).forEach(line=>{nl(14);doc.text(line,M+10,y+10);y+=14;});
+        split(ans||"(not answered)",CW-20).forEach(line=>{nl(14);t(line,M+10,y+10);y+=14;});
       }
       doc.setTextColor(150,150,150);
       doc.setFontSize(9);
-      doc.text(`[${q.pts} pts]`,W-M,y+4,{align:"right"});
+      t(`[${q.pts} pts]`,W-M,y+4,{align:"right"});
       y+=16;
       doc.setDrawColor(230,230,230);
       doc.line(M,y,W-M,y);
@@ -1022,7 +1031,7 @@ function App() {
       setSubmitted(true);
     } catch(e) {
       console.error("PDF generation error:", e);
-      alert("Error generating PDF. Please try again.");
+      alert("Error generating PDF:\n" + (e && e.message ? e.message : String(e)));
     }
     setSubmitting(false);
   };
