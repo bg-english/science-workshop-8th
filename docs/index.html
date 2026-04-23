@@ -458,19 +458,19 @@ function generatePDF(name, grade, answers, scores) {
   doc.setTextColor(255,255,255);
   doc.setFontSize(24);
   doc.setFont("helvetica","bold");
-  doc.text("Workshop Complete!",W/2,250,{align:"center"});
+  t("Workshop Complete!",W/2,250,{align:"center"});
   doc.setFontSize(14);
   doc.setFont("helvetica","normal");
-  doc.text(`${name} — ${grade}`,W/2,290,{align:"center"});
+  t(`${name} - ${grade}`,W/2,290,{align:"center"});
   doc.setFontSize(30);
   doc.setTextColor(34,197,94);
-  doc.text(`${total} / ${TOTAL_PTS} (${pct}%)`,W/2,350,{align:"center"});
+  t(`${total} / ${TOTAL_PTS} (${pct}%)`,W/2,350,{align:"center"});
   doc.setFontSize(11);
   doc.setTextColor(180,180,180);
-  doc.text("Send this PDF to Prof. Ortiz as evidence of completion.",W/2,410,{align:"center"});
+  t("Send this PDF to Prof. Ortiz as evidence of completion.",W/2,410,{align:"center"});
   doc.setTextColor(100,100,100);
   doc.setFontSize(9);
-  doc.text("1 Cor 6:19 · 1 Cor 12:26-27 · 1 Tim 3:5",W/2,500,{align:"center"});
+  t("1 Cor 6:19 - 1 Cor 12:26-27 - 1 Tim 3:5",W/2,500,{align:"center"});
   return doc;
 }
 
